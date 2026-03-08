@@ -1,0 +1,548 @@
+:root {
+  --bg: #07070f;
+  --surface: #0e0e1a;
+  --card: #131320;
+  --border: #1c1c30;
+  --accent: #00ff88;
+  --red: #ff4d6d;
+  --yellow: #ffd60a;
+  --text: #e8e8f2;
+  --muted: #52527a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(0,255,136,0.05), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(167,139,250,0.04), transparent);
+}
+
+/* HEADER */
+header {
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: rgba(7,7,15,0.95);
+  backdrop-filter: blur(16px);
+  z-index: 50;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 4px;
+}
+.logo em { color: var(--accent); font-style: normal; }
+
+.header-right {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+
+/* AREA DO JOGO SELECIONADO */
+.game-details-area {
+  margin-top: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+/* LISTA HORIZONTAL DE JOGOS */
+.games-horizontal-list {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 10px 4px 24px 4px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.games-horizontal-list::-webkit-scrollbar {
+  height: 8px;
+}
+.games-horizontal-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.games-horizontal-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+.games-horizontal-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+/* JOGO CARD (Horizontal) */
+.jogo-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 360px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.6;
+  display: flex;
+  flex-direction: column;
+}
+
+.jogo-card:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+.jogo-card.active {
+  opacity: 1;
+  border-color: rgba(0, 255, 136, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(0, 255, 136, 0.15);
+  background: rgba(19, 19, 32, 0.9);
+}
+
+.jogo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #00ccff);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.jogo-card.active::before {
+  opacity: 1;
+}
+
+.jogo-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.jogo-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.game-remove-btn.icon-only {
+  padding: 4px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+.game-remove-btn.icon-only:hover {
+  background: rgba(255,77,109,0.1);
+  opacity: 1;
+}
+
+.jogo-titulo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1.5px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.jogo-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.meta-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.stat-chips {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.chip.destaque { border-color: rgba(0,255,136,0.3); color: var(--accent); background: rgba(0,255,136,0.06); }
+.chip.alerta { border-color: rgba(255,77,109,0.3); color: var(--red); background: rgba(255,77,109,0.06); }
+
+/* PARCEIROS */
+.parceiros-titulo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin: 32px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.parceiros-titulo::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+.parceiro-accordion {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+
+.parceiro-accordion:hover { border-color: rgba(255,255,255,0.08); }
+.parceiro-accordion.aberto { border-color: rgba(255,255,255,0.12); }
+.parceiro-accordion.tem-mudanca { border-color: rgba(255,77,109,0.35) !important; }
+
+.parceiro-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.parceiro-header:hover { background: rgba(255,255,255,0.02); }
+
+.parceiro-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.parceiro-nome { font-weight: 600; font-size: 14px; }
+.parceiro-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.parceiro-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.preco-destaque {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.preco-destaque.sem { color: var(--muted); font-size: 12px; font-family: 'DM Sans', sans-serif; }
+
+.badge-mudanca {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(255,77,109,0.15);
+  color: var(--red);
+}
+
+.badge-ok {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  background: rgba(0,255,136,0.1);
+  color: var(--accent);
+}
+
+.badge-erro {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  background: rgba(255,77,109,0.1);
+  color: var(--red);
+}
+
+.chevron {
+  font-size: 12px;
+  color: var(--muted);
+  transition: transform 0.25s;
+  width: 16px;
+  text-align: center;
+}
+.aberto .chevron { transform: rotate(180deg); }
+
+/* BODY DO ACCORDION */
+.parceiro-body {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+}
+.aberto .parceiro-body { display: block; }
+
+.ticket-list { display: flex; flex-direction: column; gap: 8px; }
+
+.ticket-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+.ticket-row.mudou {
+  border-color: rgba(255,77,109,0.3);
+  background: rgba(255,77,109,0.04);
+}
+
+.ticket-setor { font-size: 13px; }
+.ticket-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.ticket-preco {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.ticket-preco.sem { color: var(--muted); font-size: 12px; font-family: 'DM Sans', sans-serif; }
+
+.parceiro-footer {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.2);
+}
+.parceiro-footer-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.link-site {
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.link-site:hover { color: var(--accent); }
+
+.erro-msg {
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.erro-msg a { color: var(--accent); text-decoration: none; font-size: 11px; }
+
+/* HISTORICO */
+.historico-wrap {
+  margin-top: 40px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.historico-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+td {
+  padding: 12px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(28,28,48,0.5);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.015); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pill-up { background: rgba(255,77,109,0.12); color: var(--red); }
+.pill-down { background: rgba(0,255,136,0.12); color: var(--accent); }
+
+.empty-hist { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; }
+
+/* SEM DADOS */
+.no-data {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--muted);
+}
+.no-data-icon { font-size: 52px; margin-bottom: 20px; }
+.no-data h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+/* PARCEIROS GRID */
+.parceiros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 4px 0 20px;
+}
+
+.parceiro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  transition: border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+.parceiro-card:hover { border-color: rgba(255,255,255,0.08); }
+.parceiro-card.tem-mudanca { border-color: rgba(255,77,109,0.4); }
+
+.parceiro-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.parceiro-card-info { display: flex; align-items: center; gap: 10px; }
+
+.parceiro-card-name { font-size: 13px; font-weight: 600; }
+.parceiro-card-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.parceiro-card-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 8px 0 12px;
+}
+.parceiro-card-price.sem { color: var(--muted); font-size: 13px; font-family: 'DM Sans', sans-serif; }
+
+.parceiro-card-rows { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 12px; flex: 1; }
+.parceiro-card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(28,28,48,0.5);
+}
+.parceiro-card-row.mudou { color: var(--red); }
+.parceiro-card-row .tk-p { font-family: 'JetBrains Mono', monospace; color: var(--text); font-size: 12px; }
+.parceiro-card-row.mudou .tk-p { color: var(--accent); }
+
+.parceiro-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  header { padding: 14px 16px; }
+  main { padding: 20px 12px; }
+  .jogo-card { min-width: 280px; }
+  .jogo-titulo { font-size: 24px; }
+  .parceiros-grid { grid-template-columns: 1fr; }
+}

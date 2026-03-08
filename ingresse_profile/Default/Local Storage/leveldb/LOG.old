@@ -1,0 +1,6 @@
+2026/03/08-05:06:47.279 5504 Reusing MANIFEST C:\Users\nicol\OneDrive\Documentos\monitor-ingressos\ingresse_profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/03/08-05:06:47.285 5504 Recovering log #28
+2026/03/08-05:06:47.288 5504 Reusing old log C:\Users\nicol\OneDrive\Documentos\monitor-ingressos\ingresse_profile\Default\Local Storage\leveldb/000028.log 
+2026/03/08-05:07:47.296 4f38 Level-0 table #33: started
+2026/03/08-05:07:47.301 4f38 Level-0 table #33: 22889 bytes OK
+2026/03/08-05:07:47.303 4f38 Delete type=0 #28
