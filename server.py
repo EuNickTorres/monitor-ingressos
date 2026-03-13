@@ -10,10 +10,9 @@ import os
 import subprocess
 import sys
 from urllib.parse import urlparse
+import db
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
-PRICES_PATH = os.path.join(BASE_DIR, "prices.json")
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -68,19 +67,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         elif path == "/config":
             try:
-                with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                    cfg = json.load(f)
+                cfg = db.carregar_config()
                 # Normaliza formato antigo para novo
                 if "jogo" in cfg and "jogos" not in cfg:
                     cfg = {"jogos": [cfg["jogo"]]}
                 self.send_json(200, cfg)
-            except FileNotFoundError:
-                self.send_json(200, {"jogos": []})
             except Exception as e:
                 self.send_json(500, {"erro": str(e)})
 
         elif path == "/prices.json":
-            self.send_file(PRICES_PATH, "application/json; charset=utf-8")
+            try:
+                prices = db.carregar_precos()
+                self.send_json(200, prices)
+            except Exception as e:
+                self.send_json(500, {"erro": str(e)})
 
         else:
             # Serve qualquer arquivo estático do diretório base
@@ -112,8 +112,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
                 # Lê config atual
                 try:
-                    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                        cfg = json.load(f)
+                    cfg = db.carregar_config()
                     if "jogo" in cfg and "jogos" not in cfg:
                         cfg = {"jogos": [{"nome": cfg["jogo"], "data": ""}]}
                 except Exception:
@@ -133,14 +132,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         jogos.append({"nome": jogo, "data": data})
                 elif action == "remove":
                     jogos = [j for j in jogos if get_nome(j) != jogo]
-                    # Remove também do prices.json
+                    # Remove também dos prices
                     try:
-                        with open(PRICES_PATH, "r", encoding="utf-8") as f:
-                            prices = json.load(f)
+                        prices = db.carregar_precos()
                         if jogo in prices:
                             del prices[jogo]
-                            with open(PRICES_PATH, "w", encoding="utf-8") as f:
-                                json.dump(prices, f, ensure_ascii=False, indent=2)
+                            db.salvar_precos(prices)
                     except Exception:
                         pass
                 else:
@@ -148,8 +145,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     return
 
                 cfg["jogos"] = jogos
-                with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-                    json.dump(cfg, f, ensure_ascii=False, indent=2)
+                db.salvar_config(cfg)
 
                 self.send_json(200, {"ok": True, "jogos": jogos})
 

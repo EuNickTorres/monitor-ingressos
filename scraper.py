@@ -10,30 +10,29 @@ import os
 import re
 from datetime import datetime
 from playwright.async_api import async_playwright
+import db
 
 # ============================================================
 # CONFIGURAÇÃO — EDITE AQUI
 # ============================================================
 
-# Lê lista de jogos do config.json (configurado pelo dashboard) ou usa o padrão
-_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
-
 def _ler_jogos_config():
-    if os.path.exists(_config_path):
-        try:
-            _cfg = json.load(open(_config_path, encoding="utf-8"))
-            if "jogos" in _cfg and isinstance(_cfg["jogos"], list) and _cfg["jogos"]:
-                nomes = []
-                for j in _cfg["jogos"]:
-                    if isinstance(j, dict):
-                        nomes.append(j.get("nome", ""))
-                    else:
-                        nomes.append(j)
-                return [n for n in nomes if n]
-            if "jogo" in _cfg and _cfg["jogo"]:
-                return [_cfg["jogo"]]
-        except:
-            pass
+    try:
+        cfg = db.carregar_config()
+        if "jogos" in cfg and isinstance(cfg["jogos"], list) and cfg["jogos"]:
+            nomes = []
+            for j in cfg["jogos"]:
+                if isinstance(j, dict):
+                    nomes.append(j.get("nome", ""))
+                else:
+                    nomes.append(j)
+            nomes = [n for n in nomes if n]
+            if nomes:
+                return nomes
+        if "jogo" in cfg and cfg["jogo"]:
+            return [cfg["jogo"]]
+    except Exception:
+        pass
     return ["Corinthians x Coritiba"]  # padrão
 
 JOGO_BUSCA = _ler_jogos_config()[0]  # mantido para referências legadas
@@ -76,8 +75,6 @@ PARCEIROS = [
         "cor": "#fb923c",
     },
 ]
-
-ARQUIVO_PRECOS = "prices.json"
 
 # ============================================================
 # HELPERS
@@ -1093,17 +1090,10 @@ async def extrair_variacoes_pagina(page):
 # ============================================================
 
 def carregar_precos_anteriores():
-    if os.path.exists(ARQUIVO_PRECOS):
-        try:
-            with open(ARQUIVO_PRECOS, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            pass
-    return {}
+    return db.carregar_precos()
 
 def salvar_precos(dados):
-    with open(ARQUIVO_PRECOS, "w", encoding="utf-8") as f:
-        json.dump(dados, f, ensure_ascii=False, indent=2)
+    db.salvar_precos(dados)
 
 def detectar_mudancas(novo, anterior):
     mudancas = []
