@@ -1127,6 +1127,8 @@ def migrar_formato_antigo(dados):
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true", help="Re-raspar jogos já existentes")
+    parser.add_argument("--parceiro", type=str, default=None,
+        help="Rodar apenas um parceiro específico (ex: arenakids)")
     args = parser.parse_args()
 
     jogos = _ler_jogos_config()
@@ -1191,6 +1193,8 @@ async def main():
             parceiros_novos = {}
 
             for parceiro in PARCEIROS:
+                if args.parceiro and parceiro["tipo"] != args.parceiro:
+                    continue
                 print(f"\n-> Raspando: {parceiro['nome']}")
                 page = await context.new_page()
                 try:
