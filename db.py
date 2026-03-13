@@ -26,8 +26,10 @@ def _get_client():
 
 def _db_get(key):
     try:
-        res = _get_client().table("store").select("value").eq("key", key).maybe_single().execute()
-        return res.data["value"] if res.data else None
+        res = _get_client().table("store").select("value").eq("key", key).execute()
+        if res.data and len(res.data) > 0:
+            return res.data[0]["value"]
+        return None
     except Exception as e:
         print(f"[DB] Erro ao ler '{key}': {e}")
         return None
