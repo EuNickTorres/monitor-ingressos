@@ -1258,7 +1258,7 @@ async def main():
         await browser.close()
 
     salvar_precos(resultados)
-    print(f"\nDados salvos em '{ARQUIVO_PRECOS}'")
+    print(f"\nDados salvos no Supabase")
     print("Acesse o dashboard via http://localhost:8000")
     print("=" * 60)
 
