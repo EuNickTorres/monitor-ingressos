@@ -389,8 +389,8 @@ async def scrape_arenakids(page, jogo):
         print(f"  [Arena Kids] Tentando cart (browser visivel): {cart_url}")
         try:
             from playwright.async_api import async_playwright as _ap
-            INGRESSE_EMAIL = "nicollastorresdamota@gmail.com"
-            INGRESSE_SENHA = "26042006Nick@"
+            INGRESSE_EMAIL = os.environ.get("INGRESSE_EMAIL", "")
+            INGRESSE_SENHA = os.environ.get("INGRESSE_SENHA", "")
             async with _ap() as _p:
                 _browser = await _p.chromium.launch(
                     headless=True,
@@ -405,7 +405,7 @@ async def scrape_arenakids(page, jogo):
                 await _ctx.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined}); window.chrome={runtime:{}};")
                 _page = await _ctx.new_page()
 
-                INGRESSE_TELEFONE = "11910246107"
+                INGRESSE_TELEFONE = os.environ.get("INGRESSE_TELEFONE", "")
                 # Usa contexto persistente para salvar sessao do Ingresse
                 # Apos primeiro login manual, nao pede mais codigo
                 import os as _os
