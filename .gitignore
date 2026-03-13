@@ -1,5 +1,24 @@
+# Perfil do browser (cache enorme, dados locais)
+ingresse_profile/
+
+# Dados gerados localmente
+prices.json
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-.env
-node_modules/
+.venv/
+venv/
+env/
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# Claude
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db

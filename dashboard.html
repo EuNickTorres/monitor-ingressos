@@ -81,20 +81,29 @@
       white-space: nowrap;
     }
 
-    .gh-btn:hover { border-color: rgba(232,232,242,0.3); color: var(--text); }
-    .gh-btn.configured { border-color: rgba(232,232,242,0.25); color: var(--text); }
+    .gh-btn:hover {
+      border-color: rgba(232, 232, 242, 0.3);
+      color: var(--text);
+    }
+
+    .gh-btn.configured {
+      border-color: rgba(232, 232, 242, 0.25);
+      color: var(--text);
+    }
 
     .gh-modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       z-index: 200;
       align-items: center;
       justify-content: center;
     }
 
-    .gh-modal-overlay.open { display: flex; }
+    .gh-modal-overlay.open {
+      display: flex;
+    }
 
     .gh-modal {
       background: var(--card);
@@ -137,7 +146,9 @@
       outline: none;
     }
 
-    .gh-field input:focus { border-color: rgba(232,232,242,0.2); }
+    .gh-field input:focus {
+      border-color: rgba(232, 232, 242, 0.2);
+    }
 
     .gh-modal-footer {
       display: flex;
@@ -857,6 +868,29 @@
       pointer-events: none;
     }
 
+    .scrape-btn {
+      background: var(--yellow);
+      color: #07070f;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+
+    .scrape-btn:hover {
+      opacity: 0.85;
+    }
+
+    .scrape-btn:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
     /* PARCEIROS GRID */
     .parceiros-grid {
       display: grid;
@@ -983,6 +1017,31 @@
       .parceiros-grid {
         grid-template-columns: 1fr;
       }
+
+      .add-game-row {
+        flex-wrap: wrap;
+      }
+
+      .add-game-row input {
+        min-width: 0;
+      }
+
+      .add-game-date {
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px solid var(--border) !important;
+        padding-left: 0 !important;
+      }
+
+      .add-game-btn {
+        width: 100%;
+        margin-top: 4px;
+      }
+
+      .scrape-btn {
+        width: 100%;
+        margin-top: 4px;
+      }
     }
   </style>
 </head>
@@ -990,7 +1049,7 @@
 <body>
 
   <header>
-    <div class="logo"><em>Ingressos</em> Parceiros</div>
+    <div class="logo"><em>Ingressosssss</em> Parceiros</div>
     <div class="header-right">
       <span id="headerTime">—</span>
       <button class="gh-btn" id="ghBtn" onclick="abrirModalGH()">⚙ GitHub</button>
@@ -1044,7 +1103,7 @@
     function getGHConfig() {
       return {
         owner: localStorage.getItem('gh_owner') || '',
-        repo:  localStorage.getItem('gh_repo')  || '',
+        repo: localStorage.getItem('gh_repo') || '',
         token: localStorage.getItem('gh_token') || ''
       };
     }
@@ -1057,7 +1116,7 @@
     function abrirModalGH() {
       const c = getGHConfig();
       document.getElementById('ghOwner').value = c.owner;
-      document.getElementById('ghRepo').value  = c.repo;
+      document.getElementById('ghRepo').value = c.repo;
       document.getElementById('ghToken').value = c.token;
       document.getElementById('ghOverlay').classList.add('open');
     }
@@ -1070,7 +1129,7 @@
 
     function salvarConfigGH() {
       localStorage.setItem('gh_owner', document.getElementById('ghOwner').value.trim());
-      localStorage.setItem('gh_repo',  document.getElementById('ghRepo').value.trim());
+      localStorage.setItem('gh_repo', document.getElementById('ghRepo').value.trim());
       localStorage.setItem('gh_token', document.getElementById('ghToken').value.trim());
       document.getElementById('ghOverlay').classList.remove('open');
       atualizarBotaoGH();
@@ -1191,6 +1250,7 @@
       <input type="text" id="novoJogoInput" placeholder="Ex: Corinthians x Palmeiras" />
       <input type="text" id="novoJogoData" class="add-game-date" placeholder="DD/MM/AAAA" />
       <button class="add-game-btn" onclick="adicionarJogo()">Adicionar</button>
+      <button class="scrape-btn" id="scrapeBtn" onclick="buscarPrecos()">Buscar Preços</button>
     </div>
 
     <!-- Lista Horizontal de Jogos -->
@@ -1450,6 +1510,28 @@
     }
 
     // ── API config ───────────────────────────────────────────────
+    async function buscarPrecos() {
+      const btn = document.getElementById("scrapeBtn");
+      if (!btn) return;
+      btn.disabled = true;
+      btn.textContent = "Buscando...";
+      try {
+        const r = await fetch("/run-scraper", { method: "POST" });
+        const j = await r.json();
+        if (r.ok) {
+          mostrarToast("Preços atualizados!");
+          await carregarDados();
+        } else {
+          mostrarToast("Erro: " + (j.erro || "falha desconhecida"), true);
+        }
+      } catch (e) {
+        mostrarToast("Erro ao buscar preços: " + e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Buscar Preços";
+      }
+    }
+
     async function adicionarJogo() {
       const inp = document.getElementById("novoJogoInput");
       const inpData = document.getElementById("novoJogoData");
@@ -1493,6 +1575,7 @@
             .map(j => typeof j === 'string' ? { nome: j, data: '' } : j)
             .filter(j => j.nome !== nomeJogo);
           await ghUpdateConfig({ jogos });
+          _configGlobal = { jogos };
           mostrarToast(`✓ "${nomeJogo}" removido.`);
         } else {
           const r = await fetch("/config", {
@@ -1501,8 +1584,16 @@
             body: JSON.stringify({ action: "remove", jogo: nomeJogo })
           });
           if (!r.ok) throw new Error("Erro ao salvar");
+          _configGlobal = {
+            jogos: (_configGlobal?.jogos || [])
+              .map(j => typeof j === 'string' ? { nome: j, data: '' } : j)
+              .filter(j => j.nome !== nomeJogo)
+          };
           mostrarToast(`✓ "${nomeJogo}" removido do config.`);
         }
+        if (_jogoSelecionado === nomeJogo) _jogoSelecionado = null;
+        if (_dadosGlobais && _dadosGlobais[nomeJogo]) delete _dadosGlobais[nomeJogo];
+        renderizarTudo(_dadosGlobais || {}, _configGlobal);
       } catch (e) {
         mostrarToast("Erro ao remover: " + e.message, true);
       }

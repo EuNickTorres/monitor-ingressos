@@ -7,6 +7,7 @@ Uso: python server.py [porta]   (padrao: 8000)
 import http.server
 import json
 import os
+import subprocess
 import sys
 from urllib.parse import urlparse
 
@@ -132,6 +133,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         jogos.append({"nome": jogo, "data": data})
                 elif action == "remove":
                     jogos = [j for j in jogos if get_nome(j) != jogo]
+                    # Remove também do prices.json
+                    try:
+                        with open(PRICES_PATH, "r", encoding="utf-8") as f:
+                            prices = json.load(f)
+                        if jogo in prices:
+                            del prices[jogo]
+                            with open(PRICES_PATH, "w", encoding="utf-8") as f:
+                                json.dump(prices, f, ensure_ascii=False, indent=2)
+                    except Exception:
+                        pass
                 else:
                     self.send_json(400, {"erro": "action deve ser 'add' ou 'remove'"})
                     return
@@ -144,6 +155,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
             except json.JSONDecodeError:
                 self.send_json(400, {"erro": "JSON invalido"})
+            except Exception as e:
+                self.send_json(500, {"erro": str(e)})
+        elif path == "/run-scraper":
+            try:
+                scraper_path = os.path.join(BASE_DIR, "scraper.py")
+                result = subprocess.run(
+                    [sys.executable, scraper_path],
+                    capture_output=True, text=True, cwd=BASE_DIR, timeout=120
+                )
+                if result.returncode == 0:
+                    self.send_json(200, {"ok": True})
+                else:
+                    self.send_json(500, {"erro": result.stderr[-500:] or "Scraper falhou"})
+            except subprocess.TimeoutExpired:
+                self.send_json(500, {"erro": "Timeout ao executar scraper"})
             except Exception as e:
                 self.send_json(500, {"erro": str(e)})
         else:

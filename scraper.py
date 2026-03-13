@@ -65,7 +65,7 @@ PARCEIROS = [
     },
     {
         "nome": "Galeria SCCP (Ticket360)",
-        "url": "https://www.ticket360.com.br/sub-categoria/1456/corinthians",
+        "url": "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
         "tipo": "ticket360",
         "cor": "#a78bfa",
     },
@@ -678,8 +678,8 @@ async def scrape_ticket360(page, jogo):
     urls_galeria = []
 
     for url_cat in [
-        "https://www.ticket360.com.br/sub-categoria/211/sao-paulo",
-        "https://www.ticket360.com.br/sub-categoria/1456/corinthians",
+        "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
+        "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
     ]:
         try:
             print(f"  [Ticket360] Tentando: {url_cat}")
