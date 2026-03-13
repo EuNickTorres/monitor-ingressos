@@ -1,6 +1,9 @@
 # Perfil do browser (cache enorme, dados locais)
 ingresse_profile/
 
+# Credenciais locais
+.env
+
 # Dados gerados localmente
 prices.json
 

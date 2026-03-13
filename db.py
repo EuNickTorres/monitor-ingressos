@@ -6,6 +6,16 @@ import json
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Carrega .env se existir (desenvolvimento local)
+_env_path = os.path.join(BASE_DIR, ".env")
+if os.path.exists(_env_path):
+    with open(_env_path) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _k, _v = _line.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
 PRICES_PATH = os.path.join(BASE_DIR, "prices.json")
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 
