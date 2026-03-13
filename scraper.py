@@ -1190,7 +1190,8 @@ async def main():
             parceiros_anteriores = dados_jogo_anterior.get("parceiros", {})
             historico_jogo = list(dados_jogo_anterior.get("historico", []))
 
-            parceiros_novos = {}
+            # Se filtrando por parceiro, preserva os outros parceiros existentes
+            parceiros_novos = dict(parceiros_anteriores) if args.parceiro else {}
 
             for parceiro in PARCEIROS:
                 if args.parceiro and parceiro["tipo"] != args.parceiro:
