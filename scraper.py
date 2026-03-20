@@ -1129,9 +1129,11 @@ async def main():
     parser.add_argument("--force", action="store_true", help="Re-raspar jogos já existentes")
     parser.add_argument("--parceiro", type=str, default=None,
         help="Rodar apenas um parceiro específico (ex: arenakids)")
+    parser.add_argument("--jogo", type=str, default=None,
+        help="Rodar apenas um jogo específico (ex: 'Corinthians x Flamengo')")
     args = parser.parse_args()
 
-    jogos = _ler_jogos_config()
+    jogos = [args.jogo] if args.jogo else _ler_jogos_config()
 
     print("=" * 60)
     print(f"  MONITOR DE INGRESSOS - {formatar_hora()}")

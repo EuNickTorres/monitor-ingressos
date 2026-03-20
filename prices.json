@@ -126,19 +126,47 @@
         "mudancas": []
       },
       "Galeria SCCP (Ticket360)": {
-        "erro": "Evento Galeria SCCP para 'Corinthians x Flamengo' nao encontrado no Ticket360",
+        "ingressos": [
+          {
+            "setor": "Padrao — Oeste Inferior Lateral (Bloco 402)",
+            "preco": "R$ 600,00"
+          }
+        ],
+        "url_evento": "a",
         "nome": "Galeria SCCP (Ticket360)",
         "cor": "#a78bfa",
-        "url_base": "https://www.ticket360.com.br/sub-categoria/1456/corinthians",
-        "atualizado_em": "08/03/2026 05:08:10",
+        "url_base": "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
+        "atualizado_em": "08/03/2026 05:10:54",
         "mudancas": []
       },
       "Camarote Fiel Torcedor (Ticket360)": {
-        "erro": "Evento Fiel Torcedor para 'Corinthians x Flamengo' nao encontrado no Ticket360",
+        "ingressos": [
+          {
+            "setor": "Excl — Cadeira",
+            "preco": "R$ 610,00"
+          },
+          {
+            "setor": "Excl — Mezanino",
+            "preco": "R$ 420,00"
+          },
+          {
+            "setor": "Excl — Mezanino Infantil",
+            "preco": "R$ 210,00"
+          },
+          {
+            "setor": "Excl — Cadeira FT",
+            "preco": "R$ 520,00"
+          },
+          {
+            "setor": "Excl — Mezanino FT",
+            "preco": "R$ 360,00"
+          }
+        ],
+        "url_evento": "a",
         "nome": "Camarote Fiel Torcedor (Ticket360)",
         "cor": "#fb923c",
         "url_base": "https://www.ticket360.com.br/eventos/pesquisar?s=Fiel+torcedor",
-        "atualizado_em": "08/03/2026 05:08:24",
+        "atualizado_em": "08/03/2026 05:11:23",
         "mudancas": []
       }
     },
@@ -590,7 +618,7 @@
         "nome": "Camarote Fielzone",
         "cor": "#00ff88",
         "url_base": "https://camarotefielzone.com.br/",
-        "atualizado_em": "20/03/2026 03:27:39",
+        "atualizado_em": "20/03/2026 04:19:03",
         "mudancas": []
       },
       "Lounge Brahma": {
@@ -612,7 +640,7 @@
         "nome": "Lounge Brahma",
         "cor": "#ffd60a",
         "url_base": "https://loungebrahma.com.br/",
-        "atualizado_em": "20/03/2026 03:27:51",
+        "atualizado_em": "20/03/2026 04:19:14",
         "mudancas": []
       },
       "Bar do Zeca": {
@@ -650,24 +678,29 @@
         "nome": "Bar do Zeca",
         "cor": "#60a5fa",
         "url_base": "https://bardozeca.soudaliga.com.br/",
-        "atualizado_em": "20/03/2026 03:27:57",
+        "atualizado_em": "20/03/2026 04:19:20",
         "mudancas": []
       },
       "Arena Kids": {
+        "ingressos": [
+          {
+            "setor": "Ver no site",
+            "preco": "-"
+          }
+        ],
+        "url_evento": "https://arenakidscorinthians.com.br/",
         "nome": "Arena Kids",
         "cor": "#f472b6",
         "url_base": "https://arenakidscorinthians.com.br/",
-        "erro": "Page.goto: net::ERR_CONNECTION_REFUSED at https://arenakidscorinthians.com.br/\nCall log:\n  - navigating to \"https://arenakidscorinthians.com.br/\", waiting until \"domcontentloaded\"\n",
-        "ingressos": [],
-        "mudancas": [],
-        "atualizado_em": "20/03/2026 03:28:00"
+        "atualizado_em": "20/03/2026 04:19:24",
+        "mudancas": []
       },
       "Galeria SCCP (Ticket360)": {
         "erro": "Evento Galeria SCCP para 'Corinthians x Internacional' nao encontrado no Ticket360",
         "nome": "Galeria SCCP (Ticket360)",
         "cor": "#a78bfa",
         "url_base": "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
-        "atualizado_em": "20/03/2026 03:28:11",
+        "atualizado_em": "20/03/2026 04:19:36",
         "mudancas": []
       },
       "Camarote Fiel Torcedor (Ticket360)": {
@@ -675,11 +708,11 @@
         "nome": "Camarote Fiel Torcedor (Ticket360)",
         "cor": "#fb923c",
         "url_base": "https://www.ticket360.com.br/eventos/pesquisar?s=Fiel+torcedor",
-        "atualizado_em": "20/03/2026 03:28:26",
+        "atualizado_em": "20/03/2026 04:19:49",
         "mudancas": []
       }
     },
-    "atualizado_em": "20/03/2026 03:28:26",
+    "atualizado_em": "20/03/2026 04:19:49",
     "historico": []
   }
 }
