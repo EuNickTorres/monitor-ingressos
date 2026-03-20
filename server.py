@@ -174,7 +174,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("PORT", 8000))
     server = http.server.HTTPServer(("", port), Handler)
     print(f"Servidor rodando em http://localhost:{port}")
     print("Ctrl+C para parar.")
