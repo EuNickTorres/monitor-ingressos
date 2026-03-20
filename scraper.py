@@ -506,7 +506,7 @@ async def scrape_arenakids(page, jogo):
                                 ps = extrair_precos_texto(txt)
                                 if ps:
                                     # Ja expandido — extrai nome+preco
-                                    nome = re.sub(r'R\$\s*[\d.,]+', '', txt).strip(" -:*+()\.\n")
+                                    nome = re.sub(r'R\$\s*[\d.,]+', '', txt).strip(" -:*+().\n")
                                     nome = re.sub(r'\s+', ' ', nome).strip()[:60]
                                     if nome and len(nome) > 3 and nome not in precos_coletados:
                                         try:
@@ -524,7 +524,7 @@ async def scrape_arenakids(page, jogo):
                                     txt2 = (await item.inner_text()).strip()
                                     ps2 = extrair_precos_texto(txt2)
                                     if ps2:
-                                        nome2 = re.sub(r'R\$\s*[\d.,]+', '', txt2).strip(" -:*+()\.\n")
+                                        nome2 = re.sub(r'R\$\s*[\d.,]+', '', txt2).strip(" -:*+().\n")
                                         nome2 = re.sub(r'\s+', ' ', nome2).strip()[:60]
                                         if nome2 and len(nome2) > 3 and nome2 not in precos_coletados:
                                             try:

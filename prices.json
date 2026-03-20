@@ -560,5 +560,126 @@
     },
     "atualizado_em": "08/03/2026 05:11:23",
     "historico": []
+  },
+  "Corinthians x Internacional": {
+    "parceiros": {
+      "Camarote Fielzone": {
+        "ingressos": [
+          {
+            "setor": "FIELZONE | CHOPERIA",
+            "preco": "R$ 450,00"
+          },
+          {
+            "setor": "CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA",
+            "preco": "R$ 450,00"
+          },
+          {
+            "setor": "CAMAROTE 5° ANDAR | LOUNGE",
+            "preco": "R$ 600,00"
+          },
+          {
+            "setor": "CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA",
+            "preco": "R$ 750,00"
+          },
+          {
+            "setor": "CAMAROTE 5° ANDAR | CADEIRA PRETA",
+            "preco": "R$ 1.800,00"
+          }
+        ],
+        "url_evento": "https://camarotefielzone.com.br/evento/corinthians-x-internacional/",
+        "nome": "Camarote Fielzone",
+        "cor": "#00ff88",
+        "url_base": "https://camarotefielzone.com.br/",
+        "atualizado_em": "20/03/2026 03:27:39",
+        "mudancas": []
+      },
+      "Lounge Brahma": {
+        "ingressos": [
+          {
+            "setor": "Experiência Lounge Brahma",
+            "preco": "R$ 650,00"
+          },
+          {
+            "setor": "Infantil até 11 anos",
+            "preco": "R$ 325,00"
+          },
+          {
+            "setor": "Inclusão no Bando PCD + Acompanhante",
+            "preco": "R$ 650,00"
+          }
+        ],
+        "url_evento": "https://loungebrahma.com.br/campeonato-brasileiro/corinthians-x-internacional-campeonato-brasileiro-2026/",
+        "nome": "Lounge Brahma",
+        "cor": "#ffd60a",
+        "url_base": "https://loungebrahma.com.br/",
+        "atualizado_em": "20/03/2026 03:27:51",
+        "mudancas": []
+      },
+      "Bar do Zeca": {
+        "ingressos": [
+          {
+            "setor": "Combo Família 2 (2+2)",
+            "preco": "R$ 2.100,00"
+          },
+          {
+            "setor": "Experiência Infantil",
+            "preco": "R$ 150,00"
+          },
+          {
+            "setor": "Cadeira + Experiência",
+            "preco": "R$ 600,00"
+          },
+          {
+            "setor": "Combo Família 3 (1+1)",
+            "preco": "R$ 1.050,00"
+          },
+          {
+            "setor": "Experiência Adulto",
+            "preco": "R$ 300,00"
+          },
+          {
+            "setor": "Combo Família 1 (2+1)",
+            "preco": "R$ 1.650,00"
+          },
+          {
+            "setor": "Combo Família 4 ( 1+2)",
+            "preco": "R$ 1.470,00"
+          }
+        ],
+        "url_evento": "https://bardozeca.soudaliga.com.br/",
+        "nome": "Bar do Zeca",
+        "cor": "#60a5fa",
+        "url_base": "https://bardozeca.soudaliga.com.br/",
+        "atualizado_em": "20/03/2026 03:27:57",
+        "mudancas": []
+      },
+      "Arena Kids": {
+        "nome": "Arena Kids",
+        "cor": "#f472b6",
+        "url_base": "https://arenakidscorinthians.com.br/",
+        "erro": "Page.goto: net::ERR_CONNECTION_REFUSED at https://arenakidscorinthians.com.br/\nCall log:\n  - navigating to \"https://arenakidscorinthians.com.br/\", waiting until \"domcontentloaded\"\n",
+        "ingressos": [],
+        "mudancas": [],
+        "atualizado_em": "20/03/2026 03:28:00"
+      },
+      "Galeria SCCP (Ticket360)": {
+        "erro": "Evento Galeria SCCP para 'Corinthians x Internacional' nao encontrado no Ticket360",
+        "nome": "Galeria SCCP (Ticket360)",
+        "cor": "#a78bfa",
+        "url_base": "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
+        "atualizado_em": "20/03/2026 03:28:11",
+        "mudancas": []
+      },
+      "Camarote Fiel Torcedor (Ticket360)": {
+        "erro": "Evento Fiel Torcedor para 'Corinthians x Internacional' nao encontrado no Ticket360",
+        "nome": "Camarote Fiel Torcedor (Ticket360)",
+        "cor": "#fb923c",
+        "url_base": "https://www.ticket360.com.br/eventos/pesquisar?s=Fiel+torcedor",
+        "atualizado_em": "20/03/2026 03:28:26",
+        "mudancas": []
+      }
+    },
+    "atualizado_em": "20/03/2026 03:28:26",
+    "historico": []
   }
 }
