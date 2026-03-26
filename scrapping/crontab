@@ -1,3 +1,0 @@
-# Roda o scraper a cada 6 horas
-# Para testar localmente: docker compose run --rm scraper python scraper.py
-0 */6 * * * cd /app && python scraper.py

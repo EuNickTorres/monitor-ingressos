@@ -32,6 +32,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_URI: mongodb://mongo:27017/ingressos
+      SCRAPER_INTERVAL_HOURS: "6"   # intervalo entre execuções (horas)
     volumes:
       # Monta o código para hot-reload em dev; preserva ingresse_profile entre execuções
       - ./scrapping:/app

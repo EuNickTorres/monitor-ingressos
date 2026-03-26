@@ -10,7 +10,6 @@ import os
 import re
 from datetime import datetime
 from playwright.async_api import async_playwright
-import db
 import mongo_upsert
 
 # ============================================================
@@ -18,8 +17,10 @@ import mongo_upsert
 # ============================================================
 
 def _ler_jogos_config():
+    cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
     try:
-        cfg = db.carregar_config()
+        with open(cfg_path, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
         if "jogos" in cfg and isinstance(cfg["jogos"], list) and cfg["jogos"]:
             nomes = []
             for j in cfg["jogos"]:
@@ -34,7 +35,7 @@ def _ler_jogos_config():
             return [cfg["jogo"]]
     except Exception:
         pass
-    return ["Corinthians x Coritiba"]  # padrão
+    return ["Corinthians x Internacional"]  # padrão
 
 JOGO_BUSCA = _ler_jogos_config()[0]  # mantido para referências legadas
 
@@ -1087,47 +1088,11 @@ async def extrair_variacoes_pagina(page):
 
 
 # ============================================================
-# PERSISTENCIA
-# ============================================================
-
-def carregar_precos_anteriores():
-    return db.carregar_precos()
-
-def salvar_precos(dados):
-    db.salvar_precos(dados)
-
-def detectar_mudancas(novo, anterior):
-    mudancas = []
-    if not anterior:
-        return mudancas
-    novos = {i["setor"]: i["preco"] for i in novo.get("ingressos", [])}
-    ants = {i["setor"]: i["preco"] for i in anterior.get("ingressos", [])}
-    for setor, preco in novos.items():
-        if setor in ants and ants[setor] != preco:
-            mudancas.append({"setor": setor, "preco_anterior": ants[setor], "preco_novo": preco})
-    return mudancas
-
-
-# ============================================================
 # MAIN
 # ============================================================
 
-def migrar_formato_antigo(dados):
-    """Converte prices.json do formato antigo (flat) para o novo (por-jogo)."""
-    if "jogo" in dados and "parceiros" in dados:
-        nome = dados["jogo"]
-        print(f"[Migracao] Formato antigo detectado. Migrando jogo '{nome}'...")
-        return {nome: {
-            "parceiros": dados.get("parceiros", {}),
-            "atualizado_em": dados.get("atualizado_em", ""),
-            "historico": dados.get("historico", []),
-        }}
-    return dados
-
-
 async def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--force", action="store_true", help="Re-raspar jogos já existentes")
     parser.add_argument("--parceiro", type=str, default=None,
         help="Rodar apenas um parceiro específico (ex: arenakids)")
     parser.add_argument("--jogo", type=str, default=None,
@@ -1140,13 +1105,6 @@ async def main():
     print(f"  MONITOR DE INGRESSOS - {formatar_hora()}")
     print(f"  Jogos: {jogos}")
     print("=" * 60)
-
-    # Carrega dados existentes e migra formato antigo se necessário
-    dados_existentes = carregar_precos_anteriores()
-    dados_existentes = migrar_formato_antigo(dados_existentes)
-
-    # Inicia resultados carregando dados de todos os jogos já salvos
-    resultados = {jogo: dado for jogo, dado in dados_existentes.items()}
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(
@@ -1176,25 +1134,17 @@ async def main():
             window.chrome = { runtime: {} };
         """)
 
+        resultados = {}
+
         for jogo in jogos:
             global JOGO_BUSCA
             JOGO_BUSCA = jogo
-
-            if not args.force and jogo in dados_existentes:
-                print(f"\n[PULANDO] '{jogo}' já tem dados. Use --force para re-raspar.")
-                continue
 
             print(f"\n{'='*60}")
             print(f"  JOGO: {jogo}")
             print(f"{'='*60}")
 
-            # Dados anteriores específicos deste jogo
-            dados_jogo_anterior = dados_existentes.get(jogo, {})
-            parceiros_anteriores = dados_jogo_anterior.get("parceiros", {})
-            historico_jogo = list(dados_jogo_anterior.get("historico", []))
-
-            # Se filtrando por parceiro, preserva os outros parceiros existentes
-            parceiros_novos = dict(parceiros_anteriores) if args.parceiro else {}
+            parceiros_novos = {}
 
             for parceiro in PARCEIROS:
                 if args.parceiro and parceiro["tipo"] != args.parceiro:
@@ -1223,22 +1173,6 @@ async def main():
                     dados["url_base"] = parceiro["url"]
                     dados["atualizado_em"] = formatar_hora()
 
-                    ant = parceiros_anteriores.get(parceiro["nome"], {})
-                    mudancas = detectar_mudancas(dados, ant)
-                    dados["mudancas"] = mudancas
-
-                    if mudancas:
-                        print(f"  *** {len(mudancas)} mudanca(s) detectada(s)! ***")
-                        for m in mudancas:
-                            print(f"      {m['setor']}: {m['preco_anterior']} -> {m['preco_novo']}")
-                            historico_jogo.append({
-                                "data": formatar_hora(),
-                                "parceiro": parceiro["nome"],
-                                "setor": m["setor"],
-                                "preco_anterior": m["preco_anterior"],
-                                "preco_novo": m["preco_novo"]
-                            })
-
                     if "erro" in dados:
                         print(f"  X Erro: {dados['erro']}")
                     else:
@@ -1252,7 +1186,7 @@ async def main():
                     parceiros_novos[parceiro["nome"]] = {
                         "nome": parceiro["nome"], "cor": parceiro["cor"],
                         "url_base": parceiro["url"], "erro": str(e),
-                        "ingressos": [], "mudancas": [], "atualizado_em": formatar_hora()
+                        "ingressos": [], "atualizado_em": formatar_hora()
                     }
                 finally:
                     await page.close()
@@ -1260,21 +1194,16 @@ async def main():
             resultados[jogo] = {
                 "parceiros": parceiros_novos,
                 "atualizado_em": formatar_hora(),
-                "historico": historico_jogo,
             }
 
         await browser.close()
 
-    salvar_precos(resultados)
+    try:
+        mongo_upsert.upsert_resultados(resultados)
+    except Exception as e:
+        print(f"[MongoDB] Erro no upsert: {e}")
 
-    if os.getenv("MONGO_URI"):
-        try:
-            mongo_upsert.upsert_resultados(resultados)
-        except Exception as e:
-            print(f"[MongoDB] Erro no upsert: {e}")
-
-    print(f"\nDados salvos")
-    print("Acesse o dashboard via http://localhost:8000")
+    print(f"\nScraping concluído — {formatar_hora()}")
     print("=" * 60)
 
 
