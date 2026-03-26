@@ -1,6 +1,0 @@
-2026/03/08-05:09:16.876 131c Reusing MANIFEST C:\Users\nicol\OneDrive\Documentos\monitor-ingressos\ingresse_profile\Default\Local Storage\leveldb/MANIFEST-000001
-2026/03/08-05:09:16.880 131c Recovering log #32
-2026/03/08-05:09:16.883 131c Reusing old log C:\Users\nicol\OneDrive\Documentos\monitor-ingressos\ingresse_profile\Default\Local Storage\leveldb/000032.log 
-2026/03/08-05:09:34.936 5e84 Level-0 table #36: started
-2026/03/08-05:09:34.941 5e84 Level-0 table #36: 22676 bytes OK
-2026/03/08-05:09:34.942 5e84 Delete type=0 #32
