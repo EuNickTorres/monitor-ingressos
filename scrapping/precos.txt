@@ -1,0 +1,224 @@
+============================================================
+  MONITOR DE INGRESSOS — PREÇOS
+  Gerado em: 17/04/2026 08:52
+============================================================
+
+============================================================
+JOGO: Corinthians x Coritiba
+Data: 26/03/2026 00:50
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+============================================================
+JOGO: Corinthians x Internacional
+Data: 26/03/2026 01:09
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     450,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     600,00
+    • FIELZONE | CHOPERIA                      R$     450,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$     750,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     650,00
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no Bando PCD + Acompanhante     R$     650,00
+
+============================================================
+JOGO: Corinthians x Palmeiras
+Data: 12/04/2026 18:30
+============================================================
+
+  Parceiro: Arena Kids  [ATIVO]
+    • FANZONE - PISTA PREMIUM                  R$     900,00
+    • FANZONE - CADEIRA INFERIOR               R$     800,00
+
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Cadeira + Experiência                    R$    1200,00
+    • Combo Família 3 (1+1)                    R$    2070,00
+    • Experiência Infantil                     R$     225,00
+    • Combo Família 1 (2+1)                    R$    3270,00
+    • Combo Família 4 (1+2)                    R$    2910,00
+    • Combo Família 2 (2+2)                    R$    4140,00
+    • Experiência Adulto                       R$     450,00
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [ATIVO]
+    • Excl — Mezanino                          R$     420,00
+    • Excl — Mezanino Infantil                 R$     210,00
+    • Excl — Cadeira FT                        R$     520,00
+    • Excl — Mezanino FT                       R$     360,00
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • CAMAROTE 5º ANDAR | ARQUIBANCADA INTERNA R$    1000,00
+    • CAMAROTE 5º ANDAR | LOUNGE               R$     800,00
+    • CAMAROTE 5º ANDAR | CADEIRA PRETA        R$    1800,00
+    • FIELZONE | CHOPERIA                      R$     600,00
+    • CAMAROTE 5º ANDAR | ARQUIBANCADA EXTERNA R$     600,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [ATIVO]
+    • Fiel — Oeste Inferior (Bloco 402) FT     R$     730,00
+    • Padrao — Oeste Inferior Lateral (Bloco 402) R$     800,00
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$    1000,00
+    • Infantil até 11 anos                     R$     400,00
+    • Inclusão no Bando PCD + Acompanhante     R$     800,00
+
+============================================================
+JOGO: Corinthians x Santa Fé
+Data: 15/04/2026 21:30
+============================================================
+
+  Parceiro: Arena Kids  [ATIVO]
+    • Combo 2 Família Cadeira Preta - 02 adultos + 01 criança (até 11 anos) R$    1720,00
+    • Combo 4 Família Cadeira Preta - 01 adulto + 02 crianças (até 11 anos) R$    1340,00
+    • Combo 3 Família Cadeira Preta - 01 adulto + 01 criança (até 11 anos) R$    1020,00
+    • Cadeira adulto avulso                    R$     700,00
+    • Combo 2 Família Terraço em Pé - 02 adultos + 01 criança (até 11 anos) R$    1320,00
+    • Combo 4 Família Terraço em Pé- 01 adulto + 02 crianças (até 11 anos) R$    1300,00
+    • Combo 3 Família Terraço em Pé - 01 adulto + 01 criança (até 11 anos) R$     820,00
+    • Terraço em Pé adulto avulso              R$     500,00
+    • Terraço em Pé criança avulsa até 11 anos R$     350,00
+    • Combo 1 Família Cadeira Preta - 02 adultos + 02 crianças (até 11 anos) R$    2040,00
+    • Combo 1 Família Terraço em Pé - 02 adultos + 02 crianças (até 11 anos) R$    1900,00
+
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Libertadores                             R$     650,00
+    • Libertadores                             R$    1135,00
+    • Libertadores                             R$     150,00
+    • Libertadores                             R$    1785,00
+    • Libertadores                             R$    1590,00
+    • Libertadores                             R$    2270,00
+    • Libertadores                             R$     300,00
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [ATIVO]
+    • Excl — Cadeira                           R$     670,00
+    • Excl — Mezanino                          R$     450,00
+    • Excl — Mezanino Infantil                 R$     225,00
+    • Excl — Cadeira FT                        R$     570,00
+    • Excl — Mezanino FT                       R$     380,00
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • FIELZONE | CHOPERIA                      R$     600,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     500,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     800,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$    1000,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [ATIVO]
+    • Padrao — Oeste Inferior Lateral (Bloco 402) R$     750,00
+    • Fiel — Oeste Inferior (Bloco 402) FT     R$     675,00
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Infantil até 11 anos                     R$     325,00
+    • Experiência Lounge Brahma                R$     650,00
+    • Inclusão no bando PCD + Acompanhante     R$     650,00
+
+============================================================
+JOGO: Corinthians x Vasco
+Data: 26/04/2026 16:00
+============================================================
+
+  Parceiro: Arena Kids  [ATIVO]
+    • Combo 4 Família Cadeira Preta            R$    1160,00
+    • Combo 1 Família Terraço em Pé            R$    1360,00
+    • Combo 2 Família Terraço em Pé            R$    1080,00
+    • Combo 4 Família Terraço em Pé            R$     960,00
+    • Combo 3 Família Terraço em Pé            R$     680,00
+
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Cadeira + Experiência                    R$     600,00
+    • Combo Família 3 (1+1)                    R$    1050,00
+    • Experiência Infantil                     R$     150,00
+    • Combo Família 1 (2+1)                    R$    1650,00
+    • Combo Família 4 ( 1+2)                   R$    1470,00
+    • Combo Família 2 (2+2)                    R$    2100,00
+    • Experiência Adulto                       R$     300,00
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • FIELZONE | CHOPERIA                      R$     600,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     600,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$    1200,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     900,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [ATIVO]
+    • Fiel — Oeste Inferior (Bloco 402) FT     R$     540,00
+    • Padrao — Oeste Inferior Lateral (Bloco 402) R$     600,00
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     650,00
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no Bando PCD + Acompanhante     R$     650,00
+
+============================================================
+JOGO: Corinthians x Peñarol
+Data: 30/04/2026 21:00
+============================================================
+
+  Parceiro: Arena Kids  [ATIVO]
+    • Combo 2 Família Cadeira Preta - 02 adultos + 01 criança (até 11 anos) R$    1720,00
+    • Combo 4 Família Cadeira Preta - 01 adulto + 02 crianças (até 11 anos) R$    1340,00
+    • Combo 3 Família Cadeira Preta - 01 adulto + 01 criança (até 11 anos) R$    1020,00
+    • Cadeira adulto avulso                    R$     700,00
+    • Combo 2 Família Terraço em Pé - 02 adultos + 01 criança (até 11 anos) R$    1320,00
+    • Combo 4 Família Terraço em Pé- 01 adulto + 02 crianças (até 11 anos) R$    1140,00
+    • Combo 3 Família Terraço em Pé - 01 adulto + 01 criança (até 11 anos) R$     820,00
+    • Terraço em Pé adulto avulso              R$     500,00
+    • Terraço em Pé criança avulsa até 11 anos R$     350,00
+    • Combo 1 Família Cadeira Preta - 02 adultos + 02 crianças (até 11 anos) R$    2040,00
+    • Combo 1 Família Terraço em Pé - 02 adultos + 02 crianças (até 11 anos) R$    1640,00
+
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Combo Família 1 (2+1)                    R$    2270,00
+    • Experiência Adulto                       R$     300,00
+    • Cadeira + Experiência                    R$     650,00
+    • Combo Família 3 (1+1)                    R$    1135,00
+    • Experiência Infantil                     R$     150,00
+    • Combo Família 1 (2+1)                    R$    1785,00
+    • Combo Família 4 ( 1+2)                   R$    1590,00
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • FIELZONE | CHOPERIA                      R$     600,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     500,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     800,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$    1000,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [ATIVO]
+    • Padrao — Oeste Inferior Lateral (Bloco 402) R$     750,00
+    • Fiel — Oeste Inferior (Bloco 402) FT     R$     675,00
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no bando PCD + Acompanhante     R$     650,00
+    • Experiência Lounge Corinthians           R$     650,00
+
+============================================================
+Total de jogos: 6 | Total de ofertas: 32
+============================================================

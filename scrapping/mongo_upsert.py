@@ -6,7 +6,7 @@ Faz upsert de Jogos, Parceiros e Ofertas.
 """
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pymongo import MongoClient, ReturnDocument
 
@@ -81,16 +81,32 @@ def upsert_resultados(resultados: dict) -> None:
         for nome_jogo, dados_jogo in resultados.items():
             slug_jogo = _make_slug(nome_jogo)
 
-            # Upsert Jogo — só preenche 'data' na criação; preserva se já existir
+            # Tenta parsear a data real do jogo extraída do Arena Kids
+            # Formato esperado: "Domingo 26/04 16h00" ou "26/04 16h00"
+            data_jogo_str = dados_jogo.get("data_jogo", "")
+            data_parsed = None
+            if data_jogo_str:
+                m = re.search(r'(\d{2})/(\d{2})\s+(\d{1,2})h(\d{2})', data_jogo_str)
+                if m:
+                    dia, mes, hora, minuto = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4))
+                    ano = datetime.now(timezone.utc).replace(tzinfo=None).year
+                    try:
+                        data_parsed = datetime(ano, mes, dia, hora, minuto)
+                    except ValueError:
+                        pass
+
+            # Upsert Jogo — usa data real do jogo se disponível; senão usa now() só na criação
+            set_on_insert = {"nome": nome_jogo, "slug": slug_jogo}
+            update_op = {"$setOnInsert": set_on_insert}
+            if data_parsed:
+                # Atualiza sempre para refletir mudanças de data/hora do jogo
+                update_op["$set"] = {"data": data_parsed}
+            else:
+                set_on_insert["data"] = datetime.now(timezone.utc).replace(tzinfo=None)
+
             jogo_doc = jogos_col.find_one_and_update(
                 {"slug": slug_jogo},
-                {
-                    "$setOnInsert": {
-                        "nome": nome_jogo,
-                        "slug": slug_jogo,
-                        "data": datetime.utcnow(),
-                    }
-                },
+                update_op,
                 upsert=True,
                 return_document=ReturnDocument.AFTER,
             )
@@ -109,13 +125,16 @@ def upsert_resultados(resultados: dict) -> None:
                 parceiro_id = parceiro_doc["_id"]
 
                 if "erro" in dados_parceiro:
-                    # Cria a oferta como "fechado" se ainda não existir, mas não
-                    # sobrescreve dados válidos de execuções anteriores
-                    ofertas_col.update_one(
-                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
-                        {"$setOnInsert": {"status": "fechado", "itens": []}},
-                        upsert=True,
+                    # Se já tem itens salvos, preserva como ativo; senão cria/mantém como fechado
+                    _existente = ofertas_col.find_one(
+                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id}, {"itens": 1}
                     )
+                    if not (_existente and _existente.get("itens")):
+                        ofertas_col.update_one(
+                            {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
+                            {"$set": {"status": "fechado", "itens": []}},
+                            upsert=True,
+                        )
                     total_ofertas += 1
                     continue
 
@@ -153,15 +172,24 @@ def upsert_resultados(resultados: dict) -> None:
                         }
                     )
 
-                status = "ativo" if itens else "fechado"
-
-                # Upsert Oferta — cria ou sobrescreve itens/status
-                # Se preço mudou, os novos valores substituem os anteriores
-                ofertas_col.update_one(
-                    {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
-                    {"$set": {"status": status, "itens": itens}},
-                    upsert=True,
-                )
+                if itens:
+                    # Achou preços novos — atualiza tudo
+                    ofertas_col.update_one(
+                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
+                        {"$set": {"status": "ativo", "itens": itens}},
+                        upsert=True,
+                    )
+                else:
+                    # Sem preços — se tem itens salvos, preserva "ativo"; senão cria/mantém como "fechado"
+                    _existente = ofertas_col.find_one(
+                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id}, {"itens": 1}
+                    )
+                    if not (_existente and _existente.get("itens")):
+                        ofertas_col.update_one(
+                            {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
+                            {"$set": {"status": "fechado", "itens": []}},
+                            upsert=True,
+                        )
                 total_ofertas += 1
 
         print(

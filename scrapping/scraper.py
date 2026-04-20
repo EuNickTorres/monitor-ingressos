@@ -83,6 +83,8 @@ PARCEIROS = [
 # ============================================================
 
 def normalizar_jogo(texto):
+    import unicodedata
+    texto = unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('ascii')
     return re.sub(r'\s+', ' ', texto.strip().lower())
 
 def jogo_corresponde(texto, busca):
@@ -269,20 +271,25 @@ async def scrape_soudaliga(page, jogo):
         # Pega linhas nao vazias
         linhas = [l.strip() for l in bloco.splitlines() if l.strip()]
 
-        # Setor: a linha mais curta relevante (sem data, sem "De ", sem "Neo Quim")
+        # Setor: a linha mais curta relevante (sem data, sem "De ", sem "Neo Quim", sem nome de competicao)
+        _filtro_setor = ["r$", "/202", "de ", "neo qu", "abertura", "lote",
+                         "libertadores", "brasileiro", "copa do brasil", "paulista", "sul-americana"]
         setor = ""
         for linha in linhas:
-            if any(x in linha for x in ["R$", "/202", "De ", "Neo Qu", "Abertura", "Lote"]):
+            if any(x in linha.lower() for x in _filtro_setor):
                 continue
             if 3 < len(linha) < 70:
                 setor = linha
-                # Para na primeira linha curta boa
                 break
 
-        # Se nao achou setor curto, pega o trecho antes do primeiro " - "
+        # Se nao achou setor curto, tenta todas as linhas com o mesmo filtro (sem break antecipado)
         if not setor:
-            titulo = linhas[0] if linhas else bloco[:60]
-            setor = titulo.split(" - ")[0].strip()[:60]
+            for linha in linhas:
+                if any(x in linha.lower() for x in _filtro_setor):
+                    continue
+                setor = linha.split(" - ")[0].strip()[:60]
+                if setor:
+                    break
 
         preco = precos[0]
         chave = setor + preco
@@ -320,33 +327,47 @@ async def scrape_arenakids(page, jogo):
         const result = [];
         for (const a of links) {
             if (!a.href || a.href.indexOf('ingresse') === -1) continue;
-            let el = a; let titulo = '';
+            let el = a; let titulo = ''; let data_texto = ''; let horario = '';
             for (let i = 0; i < 12; i++) {
                 el = el.parentElement;
                 if (!el) break;
                 const h = el.querySelector('h1,h2,h3,h4,h5,h6');
-                if (h && h.innerText.trim().length > 3) { titulo = h.innerText.trim(); break; }
+                if (h && h.innerText.trim().length > 3) { titulo = h.innerText.trim(); }
+                // Busca data (DD/MM) e horario (NNhNN) nos elementos folha do container
+                const folhas = Array.from(el.querySelectorAll('*'))
+                    .filter(e => e.childElementCount === 0)
+                    .map(e => (e.innerText || '').trim())
+                    .filter(t => t);
+                for (const t of folhas) {
+                    if (!data_texto && /\\d{2}\\/\\d{2}/.test(t)) data_texto = t;
+                    if (!horario && /\\d{1,2}h\\d{2}/.test(t)) horario = t;
+                }
+                if (titulo && data_texto && horario) break;
             }
-            result.push({ href: a.href, titulo: titulo });
+            result.push({ href: a.href, titulo: titulo, data_texto: data_texto, horario: horario });
         }
         return result;
     }""")
 
     ingresse_url = None
+    data_jogo = ""
     for par in pares:
         if jogo_corresponde(par.get('titulo', ''), jogo):
             ingresse_url = par['href']
+            data_jogo = (par.get('data_texto', '') + ' ' + par.get('horario', '')).strip()
             print(f"  [Arena Kids] Link: {ingresse_url}")
+            print(f"  [Arena Kids] Data do jogo: {data_jogo}")
             break
     if not ingresse_url:
         adversario = jogo.split(' x ')[-1].strip().lower()
         for par in pares:
             if adversario in par.get('titulo', '').lower():
                 ingresse_url = par['href']
+                data_jogo = (par.get('data_texto', '') + ' ' + par.get('horario', '')).strip()
                 break
 
     if not ingresse_url:
-        return {"ingressos": [{"setor": "Ver no site", "preco": "-"}], "url_evento": "https://arenakidscorinthians.com.br/"}
+        return {"ingressos": [{"setor": "Ver no site", "preco": "-"}], "url_evento": "https://arenakidscorinthians.com.br/", "data_jogo": ""}
 
     uuid_match = re.search(r'cart\.ingresse\.com/([0-9a-f-]{36})/tickets', ingresse_url)
     uuid = uuid_match.group(1) if uuid_match else None
@@ -357,7 +378,11 @@ async def scrape_arenakids(page, jogo):
 
     # Busca event_id na pagina publica do Ingresse
     print(f"  [Arena Kids] Abrindo pagina publica para inspecionar HTML...")
-    slug = f"corinthians-x-{jogo.split(' x ')[-1].strip().lower().replace(' ','-')}-camarote-arena-kids"
+    import unicodedata as _ud
+    def _sem_acento(s):
+        return _ud.normalize('NFKD', s).encode('ascii', 'ignore').decode('ascii')
+    adversario_slug = _sem_acento(jogo.split(' x ')[-1].strip().lower()).replace(' ', '-')
+    slug = f"corinthians-x-{adversario_slug}-camarote-arena-kids"
     url_pub = f"https://www.ingresse.com/{slug}"
     print(f"  [Arena Kids] Slug URL: {url_pub}")
     await page.goto(url_pub, wait_until="domcontentloaded", timeout=30000)
@@ -365,6 +390,40 @@ async def scrape_arenakids(page, jogo):
     html = await page.content()
 
     import re as _re
+    from datetime import datetime as _dt
+
+    # Verifica se a pagina publica mostra um evento do ano correto
+    # Se estiver esgotado e for de ano passado, ignora e busca datas disponiveis
+    ano_atual = _dt.now().year
+    corpo_pub = await page.inner_text("body")
+    evento_esgotado = "esgotado" in corpo_pub.lower()
+    ano_evento_match = _re.search(r'\b(20\d{2})\b', corpo_pub)
+    ano_evento = int(ano_evento_match.group(1)) if ano_evento_match else ano_atual
+    evento_expirado = evento_esgotado and ano_evento < ano_atual
+
+    if evento_expirado:
+        print(f"  [Arena Kids] Pagina publica mostra evento de {ano_evento} esgotado — buscando datas disponiveis...")
+        # Tenta links de datas disponiveis na pagina
+        links_datas = await page.evaluate("""() => {
+            return Array.from(document.querySelectorAll('a[href*="/"], a[href*="ingresse"]'))
+                .map(a => a.href).filter(h => h && h.includes('ingresse.com') && !h.includes('corinthians-x-'));
+        }""")
+        for link_data in links_datas[:5]:
+            try:
+                print(f"  [Arena Kids] Tentando data: {link_data}")
+                await page.goto(link_data, wait_until="domcontentloaded", timeout=20000)
+                await page.wait_for_timeout(2000)
+                html = await page.content()
+                corpo_data = await page.inner_text("body")
+                ano_m = _re.search(r'\b(20\d{2})\b', corpo_data)
+                if ano_m and int(ano_m.group(1)) >= ano_atual and "esgotado" not in corpo_data.lower():
+                    print(f"  [Arena Kids] Data valida encontrada: {link_data}")
+                    break
+            except:
+                continue
+        else:
+            html = ""  # nenhuma data valida achada
+
     patterns = [
         r'"eventId"\s*:\s*(\d{4,7})',
         r'"event_id"\s*:\s*(\d{4,7})',
@@ -381,45 +440,31 @@ async def scrape_arenakids(page, jogo):
                 print(f"  [Arena Kids] Event ID {event_id} via padrao: {pat}")
                 break
 
-    if not event_id:
-        return {"ingressos": [{"setor": "Ver no site", "preco": "-"}], "url_evento": ingresse_url}
-
     cart_url = f"https://cart.ingresse.com/{uuid}/tickets" if uuid else None
+
+    if not event_id and not cart_url:
+        return {"ingressos": [{"setor": "Ver no site", "preco": "-"}], "url_evento": ingresse_url, "data_jogo": data_jogo}
 
     # Tenta cart com browser visivel para passar pelo Cloudflare
     if cart_url:
-        print(f"  [Arena Kids] Tentando cart (browser visivel): {cart_url}")
+        print(f"  [Arena Kids] Tentando cart: {cart_url}")
         try:
             from playwright.async_api import async_playwright as _ap
-            INGRESSE_EMAIL = os.environ.get("INGRESSE_EMAIL", "")
-            INGRESSE_SENHA = os.environ.get("INGRESSE_SENHA", "")
+            import os as _os
+            state_file = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "ingresse_state.json")
+
+            if not _os.path.exists(state_file):
+                print("  [Arena Kids] ingresse_state.json nao encontrado. Execute 'python login_arenakids.py' localmente.")
+                return {"ingressos": [], "url_evento": ingresse_url, "data_jogo": data_jogo}
+
             async with _ap() as _p:
                 _browser = await _p.chromium.launch(
                     headless=True,
-                    args=["--disable-blink-features=AutomationControlled"]
+                    args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
                 )
-                _ctx = await _browser.new_context(
-                    viewport={"width": 1280, "height": 900},
-                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-                    locale="pt-BR",
-                    timezone_id="America/Sao_Paulo",
-                )
-                await _ctx.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined}); window.chrome={runtime:{}};")
-                _page = await _ctx.new_page()
-
-                INGRESSE_TELEFONE = os.environ.get("INGRESSE_TELEFONE", "")
-                # Usa contexto persistente para salvar sessao do Ingresse
-                # Apos primeiro login manual, nao pede mais codigo
-                import os as _os
-                profile_dir = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "ingresse_profile")
-                await _browser.close()  # fecha browser temporario
-                _browser = None
-
-                print("  [Arena Kids] Usando perfil persistente:", profile_dir)
-                _ctx2 = await _p.chromium.launch_persistent_context(
-                    profile_dir,
-                    headless=False,
-                    args=["--disable-blink-features=AutomationControlled", "--start-minimized"],
+                print("  [Arena Kids] Usando sessao salva:", state_file)
+                _ctx2 = await _browser.new_context(
+                    storage_state=state_file,
                     viewport={"width": 1280, "height": 900},
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                     locale="pt-BR",
@@ -428,35 +473,18 @@ async def scrape_arenakids(page, jogo):
                 await _ctx2.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined}); window.chrome={runtime:{}};")
                 _page = await _ctx2.new_page()
 
-                # Abre cart diretamente - se sessao salva, entra automaticamente
+                # Abre cart com sessao injetada
                 print("  [Arena Kids] Abrindo cart com sessao salva...")
                 await _page.goto(cart_url, wait_until="domcontentloaded", timeout=30000)
                 await _page.wait_for_timeout(3000)
                 corpo = await _page.inner_text("body")
 
-                # Se precisar de login, preenche telefone e aguarda codigo do usuario
+                # Se precisar de login, sessao expirou — encerra graciosamente
                 if "Acesse sua conta" in corpo or "acesse sua conta" in corpo.lower():
-                    print("  [Arena Kids] Sessao expirada - fazendo login...")
-                    try:
-                        tel_input = await _page.wait_for_selector(
-                            "input[type=tel], input[placeholder*=telefone i], input[placeholder*=phone i], input[placeholder*=celular i]",
-                            timeout=8000
-                        )
-                        await tel_input.fill(INGRESSE_TELEFONE)
-                        await _page.wait_for_timeout(500)
-                        await _page.click("button[type=submit], button:has-text('Continuar'), button:has-text('Próximo')")
-                        await _page.wait_for_timeout(2000)
-                        # Aguarda usuario digitar o codigo (janela fica visivel)
-                        print("  [Arena Kids] ** VERIFIQUE SEU EMAIL E DIGIT O CODIGO NA JANELA DO BROWSER **")
-                        print("  [Arena Kids] Aguardando login (60s)...")
-                        for _ in range(30):
-                            await _page.wait_for_timeout(2000)
-                            corpo = await _page.inner_text("body")
-                            if "Acesse sua conta" not in corpo and "código" not in corpo.lower():
-                                print("  [Arena Kids] Login concluido!")
-                                break
-                    except Exception as le:
-                        print(f"  [Arena Kids] Login form erro: {le}")
+                    print("  [Arena Kids] Sessao expirada. Execute 'python login_arenakids.py' localmente para renovar.")
+                    await _ctx2.close()
+                    await _browser.close()
+                    return {"ingressos": [], "url_evento": ingresse_url, "data_jogo": data_jogo}
                 for _ in range(8):
                     await _page.wait_for_timeout(2000)
                     corpo = await _page.inner_text("body")
@@ -470,169 +498,103 @@ async def scrape_arenakids(page, jogo):
                 corpo = await _page.inner_text("body")
 
                 if "Acesse sua conta" not in corpo and "Corinthians" in corpo:
-                    print("  [Arena Kids] Cart carregou! Expandindo tickets...")
-                    # Fecha popups/modais antes de expandir
-                    for fechar_sel in [
-                        "button:has-text('Fechar')", "button:has-text('Cancelar')",
-                        "[aria-label='Close']", "[aria-label='Fechar']",
-                        "button:has-text('X')", "button:has-text('×')",
-                        "[class*='close']", "[class*='dismiss']",
-                    ]:
-                        try:
-                            btn = await _page.query_selector(fechar_sel)
-                            if btn and await btn.is_visible():
-                                await btn.click()
-                                print(f"  [Arena Kids] Popup fechado: {fechar_sel}")
-                                await _page.wait_for_timeout(800)
-                                break
-                        except:
-                            pass
+                    print("  [Arena Kids] Cart carregou! Clicando aba Combos...")
 
-                    # Clica em cada item para expandir e revelar o preco
-                    # Roda multiplas passagens ate nao aparecer mais itens novos
-                    # Estrategia: itera pelos itens fechados, abre um por vez,
-                    # extrai o preco que aparece e fecha antes do popup travar tudo
-                    precos_coletados = {}  # nome -> preco
+                    # Clica na aba Combos para exibir os precos
+                    try:
+                        combos_btn = await _page.query_selector("button:has-text('Combos'), a:has-text('Combos'), [role='tab']:has-text('Combos')")
+                        if combos_btn and await combos_btn.is_visible():
+                            await combos_btn.click()
+                            await _page.wait_for_timeout(2000)
+                            print("  [Arena Kids] Aba Combos clicada")
+                    except:
+                        pass
 
-                    for passagem in range(4):
-                        await _page.keyboard.press("Escape")
-                        await _page.wait_for_timeout(300)
+                    # Aguarda precos aparecerem
+                    try:
+                        await _page.wait_for_selector("text=R$", timeout=8000)
+                    except:
+                        pass
 
-                        itens = await _page.query_selector_all("li, [class*='ticket'], [class*='item'], [class*='product'], [class*='card']")
-                        novos = 0
-                        for item in itens:
-                            try:
-                                txt = (await item.inner_text()).strip()
-                                if not txt or len(txt) < 5 or len(txt) > 300:
-                                    continue
-                                ps = extrair_precos_texto(txt)
-                                if ps:
-                                    # Ja expandido — extrai nome+preco
-                                    nome = re.sub(r'R\$\s*[\d.,]+', '', txt).strip(" -:*+().\n")
-                                    nome = re.sub(r'\s+', ' ', nome).strip()[:60]
-                                    if nome and len(nome) > 3 and nome not in precos_coletados:
-                                        try:
-                                            val = float(ps[0].replace("R$","").replace(".","").replace(",",".").strip())
-                                            if val > 0:
-                                                precos_coletados[nome] = ps[0]
-                                                novos += 1
-                                        except:
-                                            pass
-                                else:
-                                    # Ainda fechado — clica para abrir
-                                    await item.click()
-                                    await _page.wait_for_timeout(200)
-                                    # Extrai preco que apareceu
-                                    txt2 = (await item.inner_text()).strip()
-                                    ps2 = extrair_precos_texto(txt2)
-                                    if ps2:
-                                        nome2 = re.sub(r'R\$\s*[\d.,]+', '', txt2).strip(" -:*+().\n")
-                                        nome2 = re.sub(r'\s+', ' ', nome2).strip()[:60]
-                                        if nome2 and len(nome2) > 3 and nome2 not in precos_coletados:
-                                            try:
-                                                val = float(ps2[0].replace("R$","").replace(".","").replace(",",".").strip())
-                                                if val > 0:
-                                                    precos_coletados[nome2] = ps2[0]
-                                                    novos += 1
-                                            except:
-                                                pass
-                                    # Fecha popup se apareceu
-                                    await _page.keyboard.press("Escape")
-                                    await _page.wait_for_timeout(150)
-                            except:
-                                pass
-
-                        print(f"  [Arena Kids] Passagem {passagem+1}: {len(precos_coletados)} precos ({novos} novos)")
-                        if novos == 0:
-                            break
-
-                    if precos_coletados:
-                        ingressos = [{"setor": k, "preco": v} for k, v in precos_coletados.items()]
-                        print(f"  [Arena Kids] {len(ingressos)} ingresso(s) do cart!")
-
-                    corpo_tmp = await _page.inner_text("body")
-                    precos_agora = len(extrair_precos_texto(corpo_tmp))
-                    print(f"  [Arena Kids] {precos_agora} precos visiveis apos expansao")
                     corpo = await _page.inner_text("body")
 
-                    # Extrai precos do JS do cart via evaluate
-                    pares_js = await _page.evaluate("""() => {
-                        const result = [];
-                        const visited = new Set();
-                        const all = document.querySelectorAll('*');
-                        for (const el of all) {
-                            if (el.childElementCount > 0) continue;
-                            const t = (el.innerText || '').trim();
-                            if (!t.match(/R\$\s*[\d.,]+/) || t.length > 80) continue;
-                            const num = parseFloat(t.replace(/R\$\s*/,'').replace(/\./g,'').replace(',','.'));
-                            if (!num || num <= 0) continue;
-                            let nome = '';
-                            let container = el;
-                            for (let i = 0; i < 6; i++) {
-                                container = container.parentElement;
-                                if (!container) break;
-                                const kids = Array.from(container.querySelectorAll('*'));
-                                for (const k of kids) {
-                                    if (k === el || k.childElementCount > 0) continue;
-                                    const kt = (k.innerText || '').trim();
-                                    if (kt && kt.length > 5 && kt.length < 100 && !kt.match(/R\$/) && !kt.match(/^[\d\s+:]+$/)) {
-                                        nome = kt;
-                                        break;
-                                    }
-                                }
-                                if (nome) break;
-                            }
-                            if (!nome) continue;
-                            const key = nome + t;
-                            if (!visited.has(key)) {
-                                visited.add(key);
-                                result.push({setor: nome.substring(0,60), preco: t});
-                            }
-                        }
-                        return result;
-                    }""")
+                    # Extrai precos linha a linha (nome esta 2 linhas antes do preco)
+                    linhas = [l.strip() for l in corpo.splitlines() if l.strip()]
+                    ignorar = {'camarote kids', 'detalhes', 'adicionar código ou cupom',
+                               'cancelar', 'aplicar', 'compartilhar', 'preciso de ajuda'}
+                    for idx, linha in enumerate(linhas):
+                        lps = extrair_precos_texto(linha)
+                        if not lps:
+                            continue
+                        try:
+                            val = float(lps[0].replace("R$","").replace(".","").replace(",",".").strip())
+                            if val <= 0:
+                                continue
+                        except:
+                            continue
+                        nome = re.sub(r'R\$\s*[\d.,]+', '', linha).strip(" -:*+()")
+                        nome = re.sub(r'\s+', ' ', nome).strip()
+                        if not nome or len(nome) < 3:
+                            for offset in [1, 2, 3]:
+                                if idx >= offset:
+                                    cand = linhas[idx - offset].strip()
+                                    cand_l = cand.lower()
+                                    if (cand and not extrair_precos_texto(cand)
+                                            and 3 < len(cand) < 80
+                                            and cand_l not in ignorar
+                                            and not any(x in cand_l for x in ['dom,', 'seg,', 'ter,', 'qua,', 'qui,', 'sex,', 'sáb,', '18h', '21h', 'abr', 'mai'])):
+                                        nome = cand[:70]
+                                        break
+                        if nome and len(nome) > 3:
+                            ingressos.append({"setor": nome, "preco": lps[0]})
 
-                    if pares_js:
-                        ingressos = [r for r in pares_js if r and r.get("setor") and r.get("preco")]
-                        print(f"  [Arena Kids] {len(ingressos)} ingresso(s) do cart!")
+                    if ingressos:
+                        print(f"  [Arena Kids] {len(ingressos)} ingresso(s) extraidos!")
                     else:
-                        # Debug: mostra body completo para ver o que tem
-                        print(f"  [Arena Kids] JS nao achou pares. Body snippet: {corpo[:500].replace(chr(10),' ')}")
-                    
-                    if not ingressos:
-                        # Fallback linha a linha
-                        linhas = [l.strip() for l in corpo.splitlines() if l.strip()]
-                        for idx, linha in enumerate(linhas):
-                            lps = extrair_precos_texto(linha)
-                            if not lps: continue
+                        print(f"  [Arena Kids] Nenhum preco no body — tentando accordion (Radix UI)...")
+                        # Fallback: cart usa accordion Radix — cada item precisa ser clicado
+                        botoes = await _page.query_selector_all('button[data-state]')
+                        for btn in botoes:
                             try:
-                                val = float(lps[0].replace("R$","").replace(".","").replace(",",".").strip())
-                                if val <= 0: continue
+                                nome_btn = (await btn.inner_text()).strip().split('\n')[0][:80]
+                                if len(nome_btn) < 3:
+                                    continue
+                                await btn.click()
+                                await _page.wait_for_timeout(700)
+                                corpo_btn = await _page.inner_text("body")
+                                linhas_btn = [l.strip() for l in corpo_btn.splitlines() if l.strip()]
+                                for j, linha_b in enumerate(linhas_btn):
+                                    if nome_btn[:30] in linha_b:
+                                        for k in range(j + 1, min(j + 10, len(linhas_btn))):
+                                            lps_b = extrair_precos_texto(linhas_btn[k])
+                                            if lps_b:
+                                                try:
+                                                    val_b = float(lps_b[0].replace("R$","").replace(".","").replace(",",".").strip())
+                                                    if val_b > 0:
+                                                        ingressos.append({"setor": nome_btn, "preco": lps_b[0]})
+                                                except:
+                                                    pass
+                                                break
+                                        break
+                                await btn.click()
+                                await _page.wait_for_timeout(400)
                             except:
                                 continue
-                            nome = re.sub(r'R\$\s*[\d.,]+', '', linha).strip(" -:*+()")
-                            nome = re.sub(r'\s+', ' ', nome).strip()
-                            nome_l = nome.lower()
-                            nome_ruim = not nome or len(nome) < 3 or nome_l.startswith('a partir') or 'taxa' in nome_l
-                            if nome_ruim:
-                                nome = ""
-                                for offset in [1, 2]:
-                                    if idx >= offset:
-                                        cand = linhas[idx - offset].strip()
-                                        if cand and not extrair_precos_texto(cand) and 2 < len(cand) < 80:
-                                            nome = cand[:60]
-                                            break
-                            if nome and len(nome) > 2:
-                                ingressos.append({"setor": nome, "preco": lps[0]})
+                        if ingressos:
+                            print(f"  [Arena Kids] {len(ingressos)} ingresso(s) via accordion!")
+                        else:
+                            print(f"  [Arena Kids] Nenhum preco encontrado. Body snippet: {corpo[:300].replace(chr(10),' ')}")
+
                 else:
                     corpo_debug = corpo[:400].replace("\n"," ")
                     print(f"  [Arena Kids] Cart nao carregou. Body: {corpo_debug}")
                 await _ctx2.close()
+                await _browser.close()
         except Exception as e:
             print(f"  [Arena Kids] Cart login erro: {e}")
 
     # Fallback: embedstore
-    if not ingressos:
+    if not ingressos and event_id:
         embed_url = f"https://embedstore.ingresse.com/tickets/arenakidscorinthians.com.br/event/{event_id}"
         print(f"  [Arena Kids] Embedstore: {embed_url}")
         await page.goto(embed_url, wait_until="networkidle", timeout=35000)
@@ -665,7 +627,7 @@ async def scrape_arenakids(page, jogo):
     if not unicos:
         unicos = [{"setor": "Ver no site", "preco": "-"}]
 
-    return {"ingressos": unicos[:12], "url_evento": ingresse_url}
+    return {"ingressos": unicos[:12], "url_evento": ingresse_url, "data_jogo": data_jogo}
 
 
 async def scrape_ticket360(page, jogo):
@@ -842,9 +804,12 @@ async def scrape_ticket360_fiel(page, jogo):
                 try:
                     texto = (await link.inner_text()).strip().replace("\n", " ")
                     href = await link.get_attribute("href") or ""
-                    eh_fiel = "fiel" in texto.lower() or "fiel" in href.lower()
+                    href_lower = href.lower()
+                    texto_lower = texto.lower()
+                    eh_fiel = "fiel" in texto_lower or "fiel" in href_lower
+                    eh_galeria = "galeria" in texto_lower or "galeria" in href_lower or "sccp" in href_lower
                     eh_jogo = jogo_corresponde(texto, jogo) or jogo_corresponde(href, jogo)
-                    if eh_fiel and eh_jogo:
+                    if eh_fiel and eh_jogo and not eh_galeria:
                         url_completa = href if href.startswith("http") else "https://www.ticket360.com.br/" + href.lstrip("/")
                         if url_completa not in [u for _, u in urls_evento]:
                             urls_evento.append((texto[:60], url_completa))
@@ -868,6 +833,16 @@ async def scrape_ticket360_fiel(page, jogo):
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=30000)
             await page.wait_for_timeout(3000)
+
+            # Fecha modal de informacao obrigatoria se estiver bloqueando
+            try:
+                modal = await page.query_selector("#informacaoObrigatoria .close, #informacaoObrigatoria [data-dismiss='modal']")
+                if modal and await modal.is_visible():
+                    await modal.click()
+                    await page.wait_for_timeout(800)
+                    print("  [Fiel Torcedor] Modal fechado")
+            except:
+                pass
 
             btn = await page.query_selector("text=COMPRAR")
             if not btn:
@@ -952,7 +927,7 @@ async def extrair_setores_precos_frame(frame):
     try:
         # Estrategia principal: JS varre o DOM do iframe procurando
         # elementos de nome (sem R$) proximos a elementos de preco (com R$)
-        resultado = await frame.evaluate("""() => {
+        resultado = await frame.evaluate(r"""() => {
             const todos = Array.from(document.querySelectorAll('*'));
             const comPreco = todos.filter(el => {
                 const t = el.childElementCount === 0 ? (el.innerText || '').trim() : '';
@@ -1088,6 +1063,61 @@ async def extrair_variacoes_pagina(page):
 
 
 # ============================================================
+# DESCOBERTA AUTOMÁTICA DE JOGOS
+# ============================================================
+
+async def _buscar_jogos_arena_kids() -> list:
+    """Abre a página do Arena Kids e retorna os nomes de todos os jogos listados."""
+    print("  [Auto] Buscando jogos na pagina do Arena Kids...")
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+            )
+            ctx = await browser.new_context(
+                locale="pt-BR", timezone_id="America/Sao_Paulo",
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            )
+            page = await ctx.new_page()
+            await page.goto("https://arenakidscorinthians.com.br/", wait_until="domcontentloaded", timeout=30000)
+            await page.wait_for_timeout(2000)
+
+            pares = await page.evaluate(r"""() => {
+                const links = Array.from(document.querySelectorAll('a[href*="ingresse"]'));
+                const vistos = new Set();
+                const jogos = [];
+                for (const a of links) {
+                    let el = a;
+                    let titulo = '';
+                    for (let i = 0; i < 12; i++) {
+                        el = el.parentElement;
+                        if (!el) break;
+                        const h = el.querySelector('h1,h2,h3,h4,h5,h6');
+                        if (h && h.innerText.trim().length > 3) {
+                            titulo = h.innerText.trim();
+                            break;
+                        }
+                    }
+                    if (titulo && !vistos.has(titulo)) {
+                        vistos.add(titulo);
+                        jogos.push(titulo);
+                    }
+                }
+                return jogos;
+            }""")
+
+            await browser.close()
+
+            jogos = [j for j in pares if 'corinthians' in j.lower()]
+            print(f"  [Auto] {len(jogos)} jogo(s) encontrado(s): {jogos}")
+            return jogos
+    except Exception as e:
+        print(f"  [Auto] Erro ao buscar jogos: {e}")
+        return []
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
@@ -1099,7 +1129,13 @@ async def main():
         help="Rodar apenas um jogo específico (ex: 'Corinthians x Flamengo')")
     args = parser.parse_args()
 
-    jogos = [args.jogo] if args.jogo else _ler_jogos_config()
+    if args.jogo:
+        jogos = [args.jogo]
+    else:
+        jogos = await _buscar_jogos_arena_kids()
+        if not jogos:
+            print("Erro: nenhum jogo encontrado na pagina do Arena Kids")
+            return
 
     print("=" * 60)
     print(f"  MONITOR DE INGRESSOS - {formatar_hora()}")
@@ -1191,9 +1227,17 @@ async def main():
                 finally:
                     await page.close()
 
+            # Propaga data_jogo extraída do Arena Kids (se disponível)
+            data_jogo_extraida = ""
+            for dados_p in parceiros_novos.values():
+                if dados_p.get("data_jogo"):
+                    data_jogo_extraida = dados_p["data_jogo"]
+                    break
+
             resultados[jogo] = {
                 "parceiros": parceiros_novos,
                 "atualizado_em": formatar_hora(),
+                "data_jogo": data_jogo_extraida,
             }
 
         await browser.close()

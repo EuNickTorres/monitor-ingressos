@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 
 INTERVALO_HORAS = int(os.getenv("SCRAPER_INTERVAL_HOURS", "6"))
-INTERVALO_SEGUNDOS = INTERVALO_HORAS * 3600
+INTERVALO_SEGUNDOS = int(os.getenv("SCRAPER_INTERVAL_SECONDS", 180))
 
 
 def _log(msg: str) -> None:
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # Import tardio para evitar execução acidental ao importar este módulo
     from scraper import main  # noqa: E402
 
-    _log(f"Iniciado. Intervalo: {INTERVALO_HORAS}h ({INTERVALO_SEGUNDOS}s)")
+    _log(f"Iniciado. Intervalo: {INTERVALO_SEGUNDOS}s")
 
     while True:
         _log("Iniciando execução do scraper...")
@@ -33,5 +33,5 @@ if __name__ == "__main__":
         except Exception as exc:
             _log(f"Erro durante scraping: {exc}")
 
-        _log(f"Próxima execução em {INTERVALO_HORAS}h. Aguardando...")
+        _log(f"Próxima execução em {INTERVALO_SEGUNDOS}s. Aguardando...")
         time.sleep(INTERVALO_SEGUNDOS)
