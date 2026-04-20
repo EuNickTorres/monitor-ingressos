@@ -1,0 +1,5 @@
+ingresse_profile/
+*.png
+__pycache__/
+*.pyc
+prices.json

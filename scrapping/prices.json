@@ -1,0 +1,104 @@
+{
+  "Corinthians x Coritiba": {
+    "parceiros": {
+      "Camarote Fielzone": {
+        "erro": "Jogo 'Corinthians x Coritiba' nao encontrado na pagina",
+        "nome": "Camarote Fielzone",
+        "cor": "#00ff88",
+        "url_base": "https://camarotefielzone.com.br/",
+        "atualizado_em": "26/03/2026 00:24:11",
+        "mudancas": []
+      },
+      "Lounge Brahma": {
+        "erro": "Jogo 'Corinthians x Coritiba' nao encontrado",
+        "nome": "Lounge Brahma",
+        "cor": "#ffd60a",
+        "url_base": "https://loungebrahma.com.br/",
+        "atualizado_em": "26/03/2026 00:24:18",
+        "mudancas": []
+      },
+      "Bar do Zeca": {
+        "ingressos": [
+          {
+            "setor": "Ingresso 1",
+            "preco": "R$ 80,00"
+          },
+          {
+            "setor": "Ingresso 2",
+            "preco": "R$ 40,00"
+          },
+          {
+            "setor": "Ingresso 3",
+            "preco": "R$ 600,00"
+          },
+          {
+            "setor": "Ingresso 4",
+            "preco": "R$ 1.050,00"
+          },
+          {
+            "setor": "Ingresso 5",
+            "preco": "R$ 300,00"
+          },
+          {
+            "setor": "Ingresso 6",
+            "preco": "R$ 2.780,00"
+          },
+          {
+            "setor": "Ingresso 7",
+            "preco": "R$ 350,00"
+          },
+          {
+            "setor": "Ingresso 8",
+            "preco": "R$ 1.785,00"
+          },
+          {
+            "setor": "Ingresso 9",
+            "preco": "R$ 1.590,00"
+          },
+          {
+            "setor": "Ingresso 10",
+            "preco": "R$ 150,00"
+          }
+        ],
+        "url_evento": "https://bardozeca.soudaliga.com.br/",
+        "nome": "Bar do Zeca",
+        "cor": "#60a5fa",
+        "url_base": "https://bardozeca.soudaliga.com.br/",
+        "atualizado_em": "26/03/2026 00:24:24",
+        "mudancas": []
+      },
+      "Arena Kids": {
+        "ingressos": [
+          {
+            "setor": "Ver no site",
+            "preco": "-"
+          }
+        ],
+        "url_evento": "https://arenakidscorinthians.com.br/",
+        "nome": "Arena Kids",
+        "cor": "#f472b6",
+        "url_base": "https://arenakidscorinthians.com.br/",
+        "atualizado_em": "26/03/2026 00:24:28",
+        "mudancas": []
+      },
+      "Galeria SCCP (Ticket360)": {
+        "erro": "Evento Galeria SCCP para 'Corinthians x Coritiba' nao encontrado no Ticket360",
+        "nome": "Galeria SCCP (Ticket360)",
+        "cor": "#a78bfa",
+        "url_base": "https://www.ticket360.com.br/sub-categoria/1708/camarote-galeria-sccp",
+        "atualizado_em": "26/03/2026 00:24:47",
+        "mudancas": []
+      },
+      "Camarote Fiel Torcedor (Ticket360)": {
+        "erro": "Evento Fiel Torcedor para 'Corinthians x Coritiba' nao encontrado no Ticket360",
+        "nome": "Camarote Fiel Torcedor (Ticket360)",
+        "cor": "#fb923c",
+        "url_base": "https://www.ticket360.com.br/eventos/pesquisar?s=Fiel+torcedor",
+        "atualizado_em": "26/03/2026 00:25:11",
+        "mudancas": []
+      }
+    },
+    "atualizado_em": "26/03/2026 00:25:11",
+    "historico": []
+  }
+}

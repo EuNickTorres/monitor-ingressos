@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor de Ingressos</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070f;
+      --surface: #0e0e1a;
+      --card: #131320;
+      --border: #1c1c30;
+      --accent: #ffffff;
+      --red: #ff4d6d;
+      --yellow: #ffd60a;
+      --text: #e8e8f2;
+      --muted: #52527a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 20% 0%, rgba(255,255,255,0.03), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255,255,255,0.02), transparent);
+    }
+
+    /* HEADER */
+    header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(7,7,15,0.95);
+      backdrop-filter: blur(16px);
+      z-index: 50;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 4px;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    .header-right {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .api-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+    .api-status-dot.online { background: var(--accent); animation: blink 2s infinite; }
+    .api-status-dot.offline { background: var(--red); }
+
+    main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+
+    .game-details-area {
+      margin-top: 24px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* LISTA HORIZONTAL DE JOGOS */
+    .games-horizontal-list {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 10px 4px 24px 4px;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .games-horizontal-list::-webkit-scrollbar { height: 8px; }
+    .games-horizontal-list::-webkit-scrollbar-track { background: transparent; }
+    .games-horizontal-list::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 10px; }
+    .games-horizontal-list::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.2); }
+
+    /* JOGO CARD */
+    .jogo-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 28px;
+      position: relative;
+      overflow: hidden;
+      min-width: 320px;
+      max-width: 360px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.6;
+      display: flex;
+      flex-direction: column;
+    }
+    .jogo-card:hover { opacity: 0.85; transform: translateY(-2px); }
+    .jogo-card.active {
+      opacity: 1;
+      border-color: rgba(255,255,255,0.4);
+      box-shadow: 0 10px 30px -10px rgba(255,255,255,0.1);
+      background: rgba(19,19,32,0.9);
+    }
+    .jogo-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ffffff, #cccccc);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .jogo-card.active::before { opacity: 1; }
+
+    .jogo-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .jogo-badge {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .jogo-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 1.5px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .jogo-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .meta-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    .stat-chips {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-align: center;
+    }
+    .chip.destaque { border-color: rgba(255,255,255,0.3); color: var(--accent); background: rgba(255,255,255,0.06); }
+    .chip.alerta   { border-color: rgba(255,77,109,0.3); color: var(--red);   background: rgba(255,77,109,0.06); }
+
+    /* PARCEIROS */
+    .parceiros-titulo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--text);
+      margin: 32px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .parceiros-titulo::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .badge-ok {
+      font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 600;
+      background: rgba(255,255,255,0.1); color: var(--accent);
+    }
+    .badge-erro {
+      font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 600;
+      background: rgba(255,77,109,0.1); color: var(--red);
+    }
+
+    .ticket-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .link-site { font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .link-site:hover { color: var(--accent); }
+
+    /* SEM DADOS */
+    .no-data { text-align: center; padding: 80px 20px; color: var(--muted); }
+    .no-data-icon { font-size: 52px; margin-bottom: 20px; }
+    .no-data h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px; letter-spacing: 2px;
+      color: var(--text); margin-bottom: 12px;
+    }
+    code {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 2px 8px;
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent);
+    }
+
+    .erro-msg {
+      padding: 16px; text-align: center;
+      color: var(--muted); font-size: 13px; line-height: 1.6;
+    }
+
+    /* PARCEIROS GRID */
+    .parceiros-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      padding: 4px 0 20px;
+    }
+
+    .parceiro-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 20px;
+      transition: border-color 0.2s; display: flex; flex-direction: column;
+    }
+    .parceiro-card:hover { border-color: rgba(255,255,255,0.08); }
+    .parceiro-card.fechado { border-color: rgba(255,77,109,0.4); }
+
+    .parceiro-card-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+
+    .parceiro-card-info { display: flex; align-items: center; gap: 10px; }
+
+    .parceiro-card-name { font-size: 13px; font-weight: 600; }
+    .parceiro-card-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .parceiro-card-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px; font-weight: 700; color: var(--accent);
+      margin: 8px 0 12px;
+    }
+
+    .parceiro-card-rows { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 12px; flex: 1; }
+    .parceiro-card-row {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--muted);
+      padding: 6px 0; border-bottom: 1px solid rgba(28,28,48,0.5);
+    }
+    .parceiro-card-row .tk-p {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text); font-size: 12px; white-space: nowrap; margin-left: 8px;
+    }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 13px; flex-shrink: 0;
+    }
+
+    .parceiro-card-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 10px; border-top: 1px solid var(--border);
+      font-size: 10px; color: var(--muted); margin-top: auto;
+    }
+
+    .loading-spinner {
+      text-align: center; padding: 40px; color: var(--muted);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 14px 16px; }
+      main { padding: 20px 12px; }
+      .jogo-card { min-width: 280px; }
+      .jogo-titulo { font-size: 24px; }
+      .parceiros-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo"><em>Ingressos</em> Parceiros</div>
+    <div class="header-right">
+      <div class="api-status">
+        <div class="api-status-dot" id="apiDot"></div>
+        <span id="headerTime">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="content">
+    <div class="no-data">
+      <div class="no-data-icon">⚙️</div>
+      <h2>Conectando à API</h2>
+      <p>Aguardando resposta de <code id="apiUrlDisplay"></code></p>
+    </div>
+  </main>
+
+  <script>
+    // ── Configuração ─────────────────────────────────────────────
+    const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:3000'
+      : '';
+
+    document.getElementById('apiUrlDisplay').textContent = API_URL || window.location.origin;
+
+    // ── Estado ───────────────────────────────────────────────────
+    let _jogos = [];
+    let _jogoSelecionado = null; // slug
+    const _ofertasCache = {};   // slug → oferta[]
+
+    // ── Boot ─────────────────────────────────────────────────────
+    carregar();
+    setInterval(carregar, 60 * 1000);
+
+    async function carregar() {
+      try {
+        const r = await fetch(`${API_URL}/jogos`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        _jogos = await r.json();
+        setApiStatus(true);
+        renderizarTudo();
+      } catch (e) {
+        setApiStatus(false);
+        mostrarErroConexao(e);
+      }
+    }
+
+    // ── Status da API ────────────────────────────────────────────
+    function setApiStatus(online) {
+      const dot = document.getElementById('apiDot');
+      const time = document.getElementById('headerTime');
+      dot.className = 'api-status-dot ' + (online ? 'online' : 'offline');
+      time.textContent = online
+        ? 'API · ' + new Date().toLocaleTimeString('pt-BR')
+        : 'API offline';
+    }
+
+    // ── Render principal ─────────────────────────────────────────
+    function renderizarTudo() {
+      const content = document.getElementById('content');
+
+      if (_jogos.length === 0) {
+        content.innerHTML = `
+          <div class="no-data">
+            <div class="no-data-icon">🏟️</div>
+            <h2>Nenhum jogo cadastrado</h2>
+            <p>Insira documentos na collection <code>jogos</code> do MongoDB.</p>
+          </div>`;
+        return;
+      }
+
+      const jogosOrdenados = [..._jogos].sort((a, b) => new Date(a.data) - new Date(b.data));
+
+      if (!_jogoSelecionado || !jogosOrdenados.find(j => j.slug === _jogoSelecionado)) {
+        _jogoSelecionado = jogosOrdenados[0].slug;
+      }
+
+      let html = `<div class="games-horizontal-list">`;
+      jogosOrdenados.forEach(j => { html += getGameCardHtml(j, j.slug === _jogoSelecionado); });
+      html += `</div>`;
+      html += `<div id="game-details-area" class="game-details-area"></div>`;
+
+      content.innerHTML = html;
+      carregarOfertas(_jogoSelecionado);
+    }
+
+    // ── Card de Jogo ─────────────────────────────────────────────
+    function getGameCardHtml(jogo, isActive) {
+      const ofertasJogo = _ofertasCache[jogo.slug];
+      const totalOfertas = ofertasJogo != null ? ofertasJogo.length : null;
+      const slugSafe = jogo.slug.replace(/[^a-zA-Z0-9]/g, '_');
+
+      return `
+        <div class="jogo-card${isActive ? ' active' : ''}"
+             onclick="selecionarJogo('${jogo.slug}')"
+             id="card-${slugSafe}">
+          <div class="jogo-card-header">
+            <div class="jogo-badge">🗓 ${formatarData(jogo.data)}</div>
+          </div>
+          <div class="jogo-titulo">${jogo.nome}</div>
+          <div class="jogo-meta">
+            ${totalOfertas !== null
+              ? `<div class="meta-item"><span class="meta-dot"></span> ${totalOfertas} oferta(s)</div>`
+              : `<div class="meta-item" style="color:var(--muted)">...</div>`}
+          </div>
+        </div>`;
+    }
+
+    // ── Selecionar Jogo ──────────────────────────────────────────
+    async function selecionarJogo(slug) {
+      if (_jogoSelecionado === slug) return;
+
+      const oldActive = document.querySelector('.jogo-card.active');
+      if (oldActive) oldActive.classList.remove('active');
+
+      const novoCard = document.getElementById('card-' + slug.replace(/[^a-zA-Z0-9]/g, '_'));
+      if (novoCard) {
+        novoCard.classList.add('active');
+        novoCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+
+      _jogoSelecionado = slug;
+      await carregarOfertas(slug);
+    }
+
+    // ── Carregar Ofertas ─────────────────────────────────────────
+    async function carregarOfertas(jogoSlug) {
+      const container = document.getElementById('game-details-area');
+      if (!container) return;
+
+      if (_ofertasCache[jogoSlug]) {
+        renderizarDetalhes(jogoSlug);
+        return;
+      }
+
+      container.innerHTML = `<div class="loading-spinner">Carregando ofertas...</div>`;
+
+      try {
+        const r = await fetch(`${API_URL}/ofertas?jogo_slug=${jogoSlug}`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        _ofertasCache[jogoSlug] = await r.json();
+
+        // Atualiza chip de total no card
+        const card = document.getElementById('card-' + jogoSlug.replace(/[^a-zA-Z0-9]/g, '_'));
+        if (card) {
+          const meta = card.querySelector('.jogo-meta');
+          if (meta) {
+            const total = _ofertasCache[jogoSlug].length;
+            meta.innerHTML = `<div class="meta-item"><span class="meta-dot"></span> ${total} oferta(s)</div>`;
+          }
+        }
+
+        renderizarDetalhes(jogoSlug);
+      } catch (e) {
+        container.innerHTML = `<div class="erro-msg" style="padding:40px">
+          <div style="font-size:36px;margin-bottom:12px">⚡</div>
+          <div>Erro ao carregar ofertas:<br><code>${e.message}</code></div>
+        </div>`;
+      }
+    }
+
+    // ── Renderiza Detalhes ────────────────────────────────────────
+    function renderizarDetalhes(jogoSlug) {
+      const container = document.getElementById('game-details-area');
+      if (!container) return;
+
+      const jogo = _jogos.find(j => j.slug === jogoSlug);
+      const ofertas = _ofertasCache[jogoSlug] || [];
+
+      if (ofertas.length === 0) {
+        container.innerHTML = `<div class="erro-msg" style="padding:40px;text-align:center;color:var(--muted)">
+          <div style="font-size:36px;margin-bottom:12px">⏳</div>
+          <div>Nenhuma oferta para <strong style="color:var(--text)">${jogo?.nome || jogoSlug}</strong>.</div>
+        </div>`;
+        return;
+      }
+
+      let html = `
+        <div class="parceiros-titulo">
+          PARCEIROS — ${(jogo?.nome || jogoSlug).toUpperCase()}
+        </div>
+        <div class="parceiros-grid">`;
+
+      ofertas.forEach(o => { html += renderizarParceiroCard(o); });
+
+      html += `</div>`;
+
+      container.innerHTML = html;
+      container.style.animation = 'none';
+      container.offsetHeight;
+      container.style.animation = null;
+    }
+
+    // ── Card de Parceiro (Oferta) ─────────────────────────────────
+    function renderizarParceiroCard(oferta) {
+      const parceiro = oferta.parceiro_id || {};
+      const itens    = oferta.itens || [];
+      const nome     = parceiro.nome || 'Parceiro';
+      const fechado  = oferta.status === 'fechado';
+      const initials = nome.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+      const CORES = ['#ffffff', '#cccccc', '#aaaaaa', '#888888', '#666666', '#444444'];
+      const cor   = CORES[nome.charCodeAt(0) % CORES.length];
+
+      const badge = fechado
+        ? `<span class="badge-erro">FECHADO</span>`
+        : `<span class="badge-ok">ATIVO</span>`;
+
+      const menorPreco = itens.length > 0 ? Math.min(...itens.map(i => i.preco)) : null;
+
+      let rowsHtml = '';
+      if (itens.length > 0) {
+        rowsHtml = `<div class="parceiro-card-rows">` +
+          itens.map(item => {
+            const precoFmt = `R$ ${item.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            const sub = item.tipo === 'combo'
+              ? `${item.adultos || 0} adulto(s)${item.criancas ? ` + ${item.criancas} criança(s)` : ''}`
+              : item.publico;
+            return `
+              <div class="parceiro-card-row">
+                <div>
+                  <div>${item.nome}</div>
+                  <div class="ticket-sub">${sub}</div>
+                </div>
+                <span class="tk-p">${precoFmt}</span>
+              </div>`;
+          }).join('') +
+          `</div>`;
+      } else {
+        rowsHtml = `<div style="font-size:11px;color:var(--muted);margin:8px 0">Nenhum item disponível</div>`;
+      }
+
+      return `
+        <div class="parceiro-card${fechado ? ' fechado' : ''}">
+          <div class="parceiro-card-header">
+            <div class="parceiro-card-info">
+              <div class="avatar" style="background:${cor}18;color:${cor}">${initials}</div>
+              <div>
+                <div class="parceiro-card-name">${nome}</div>
+                <div class="parceiro-card-sub">${itens.length} tipo(s)</div>
+              </div>
+            </div>
+            ${badge}
+          </div>
+          ${rowsHtml}
+          <div class="parceiro-card-foot">
+            <span>${parceiro.slug || '—'}</span>
+          </div>
+        </div>`;
+    }
+
+    // ── Erro de conexão ───────────────────────────────────────────
+    function mostrarErroConexao(e) {
+      document.getElementById('content').innerHTML = `
+        <div class="no-data">
+          <div class="no-data-icon">⚡</div>
+          <h2>Sem conexão com a API</h2>
+          <p>Verifique se o servidor está rodando em <code>${API_URL}</code></p>
+          <p style="font-size:11px;color:var(--muted);margin-top:12px">${e.message}</p>
+          <p style="margin-top:20px"><code>docker compose up --build</code></p>
+        </div>`;
+    }
+
+    // ── Utilitários ───────────────────────────────────────────────
+    function formatarData(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      const data = d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+      const h = d.getUTCHours(), m = d.getUTCMinutes();
+      if (h === 0 && m === 0) return data;
+      return `${data} ${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}`;
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: ingressos-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: ingressos
+
+  backend:
+    build: ./backend
+    container_name: ingressos-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ingressos
+    volumes:
+      - ./backend/src:/app/src
+    depends_on:
+      - mongo
+    command: npm run dev
+
+  scraper:
+    build: ./scrapping
+    container_name: ingressos-scraper
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ingressos
+      SCRAPER_INTERVAL_HOURS: "6"   # intervalo entre execuções (horas)
+    volumes:
+      # Monta o código para hot-reload em dev; preserva ingresse_profile entre execuções
+      - ./scrapping:/app
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:

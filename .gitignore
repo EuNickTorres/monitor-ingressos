@@ -1,27 +1,25 @@
-# Perfil do browser (cache enorme, dados locais)
-ingresse_profile/
+# ── Scraping ──────────────────────────────────────────
+**/ingresse_profile/
 
-# Credenciais locais
+# ── Credenciais / ambiente ────────────────────────────
 .env
+!.env.example
 
-# Dados gerados localmente
-prices.json
+# ── Node ──────────────────────────────────────────────
+**/node_modules/
 
-# Python
+# ── Python ────────────────────────────────────────────
 __pycache__/
 *.py[cod]
-*.pyo
 .venv/
-venv/
-env/
 
-# VS Code / IDE
+# ── VS Code / IDE ─────────────────────────────────────
 .vscode/
 .idea/
 
-# Claude
+# ── Claude ────────────────────────────────────────────
 .claude/
 
-# OS
+# ── OS ────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
