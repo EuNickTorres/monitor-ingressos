@@ -85,6 +85,7 @@ PARCEIROS = [
 def normalizar_jogo(texto):
     import unicodedata
     texto = unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('ascii')
+    texto = re.sub(r'\s*-\s*', '-', texto)  # normaliza "Atletico - MG" → "Atletico-MG"
     return re.sub(r'\s+', ' ', texto.strip().lower())
 
 _ALIASES_JOGO = {
@@ -386,13 +387,7 @@ async def scrape_soudaliga(page, jogo):
         print(f"  [Sou da Liga]   {setor[:50]}: {preco}")
 
     if not ingressos:
-        # Fallback texto bruto
-        conteudo = await page.inner_text("body")
-        precos = extrair_precos_texto(conteudo)
-        if precos:
-            ingressos = [{"setor": f"Ingresso {i+1}", "preco": p} for i, p in enumerate(precos[:10])]
-        else:
-            return {"erro": f"Jogo '{jogo}' nao encontrado ou site bloqueado"}
+        return {"erro": f"Jogo '{jogo}' nao encontrado no Bar do Zeca"}
 
     return {"ingressos": ingressos, "url_evento": "https://bardozeca.soudaliga.com.br/"}
 
