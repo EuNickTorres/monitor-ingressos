@@ -1,6 +1,6 @@
 ============================================================
   MONITOR DE INGRESSOS — PREÇOS
-  Gerado em: 17/04/2026 08:52
+  Gerado em: 22/04/2026 00:38
 ============================================================
 
 ============================================================
@@ -139,27 +139,27 @@ Data: 26/04/2026 16:00
 ============================================================
 
   Parceiro: Arena Kids  [ATIVO]
-    • Combo 4 Família Cadeira Preta            R$    1160,00
-    • Combo 1 Família Terraço em Pé            R$    1360,00
-    • Combo 2 Família Terraço em Pé            R$    1080,00
     • Combo 4 Família Terraço em Pé            R$     960,00
-    • Combo 3 Família Terraço em Pé            R$     680,00
 
   Parceiro: Bar do Zeca  [ATIVO]
+    • Combo Família 2 (2+2)                    R$    2100,00
+    • Experiência Adulto                       R$     300,00
     • Cadeira + Experiência                    R$     600,00
     • Combo Família 3 (1+1)                    R$    1050,00
     • Experiência Infantil                     R$     150,00
     • Combo Família 1 (2+1)                    R$    1650,00
     • Combo Família 4 ( 1+2)                   R$    1470,00
-    • Combo Família 2 (2+2)                    R$    2100,00
-    • Experiência Adulto                       R$     300,00
 
-  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
-    (sem preços disponíveis)
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [ATIVO]
+    • Excl — Cadeira                           R$     610,00
+    • Excl — Mezanino                          R$     420,00
+    • Excl — Mezanino Infantil                 R$     210,00
+    • Excl — Cadeira FT                        R$     520,00
+    • Excl — Mezanino FT                       R$     360,00
 
   Parceiro: Camarote Fielzone  [ATIVO]
-    • FIELZONE | CHOPERIA                      R$     600,00
     • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     600,00
+    • FIELZONE | CHOPERIA                      R$     600,00
     • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$    1200,00
     • CAMAROTE 5° ANDAR | LOUNGE               R$     900,00
     • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
@@ -169,7 +169,7 @@ Data: 26/04/2026 16:00
     • Padrao — Oeste Inferior Lateral (Bloco 402) R$     600,00
 
   Parceiro: Lounge Brahma  [ATIVO]
-    • Experiência Lounge Brahma                R$     650,00
+    • Experiência Lounge Brahma                R$    1200,00
     • Infantil até 11 anos                     R$     325,00
     • Inclusão no Bando PCD + Acompanhante     R$     650,00
 
@@ -192,16 +192,20 @@ Data: 30/04/2026 21:00
     • Combo 1 Família Terraço em Pé - 02 adultos + 02 crianças (até 11 anos) R$    1640,00
 
   Parceiro: Bar do Zeca  [ATIVO]
+    • Combo Família 1 (2+1)                    R$    1785,00
+    • Combo Família 4 ( 1+2)                   R$    1590,00
     • Combo Família 1 (2+1)                    R$    2270,00
     • Experiência Adulto                       R$     300,00
     • Cadeira + Experiência                    R$     650,00
     • Combo Família 3 (1+1)                    R$    1135,00
     • Experiência Infantil                     R$     150,00
-    • Combo Família 1 (2+1)                    R$    1785,00
-    • Combo Família 4 ( 1+2)                   R$    1590,00
 
-  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
-    (sem preços disponíveis)
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [ATIVO]
+    • Excl — Cadeira                           R$     670,00
+    • Excl — Mezanino                          R$     450,00
+    • Excl — Mezanino Infantil                 R$     225,00
+    • Excl — Cadeira FT                        R$     570,00
+    • Excl — Mezanino FT                       R$     380,00
 
   Parceiro: Camarote Fielzone  [ATIVO]
     • FIELZONE | CHOPERIA                      R$     600,00
@@ -215,10 +219,390 @@ Data: 30/04/2026 21:00
     • Fiel — Oeste Inferior (Bloco 402) FT     R$     675,00
 
   Parceiro: Lounge Brahma  [ATIVO]
+    • Infantil até 11 anos                     R$     400,00
+    • Inclusão no bando PCD + Acompanhante     R$     800,00
+    • Experiência Lounge Corinthians           R$    1200,00
+
+============================================================
+JOGO: Corinthians x São Paulo
+Data: 10/05/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Cadeira + Experiência                    R$     800,00
+    • Combo Família 3 (1+1)                    R$    1390,00
+    • Experiência Infantil                     R$     175,00
+    • Combo Família 1 (2+1)                    R$    2190,00
+    • Combo Família 4 ( 1+2)                   R$    1950,00
+    • Combo Família 2 (2+2)                    R$    2780,00
+    • Experiência Adulto                       R$     350,00
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • FIELZONE | CHOPERIA                      R$     800,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     800,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     900,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$    1200,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    2000,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [ATIVO]
+    • Fiel — Oeste Inferior (Bloco 402) FT     R$     585,00
+    • Padrao — Oeste Inferior Lateral (Bloco 402) R$     650,00
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     800,00
+    • Infantil até 11 anos                     R$     400,00
+    • Inclusão no Bando PCD + Acompanhante     R$     800,00
+
+============================================================
+JOGO: Corinthians x Barra
+Data: 14/05/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • FIELZONE | CHOPERIA                      R$     300,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     400,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     650,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$     800,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     500,00
+    • Infantil até 11 anos                     R$     250,00
+    • Inclusão no Bando PCD + Acompanhante     R$     500,00
+
+============================================================
+JOGO: Corinthians x Atlético-MG
+Data: 24/05/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • FIELZONE | CHOPERIA                      R$     600,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     600,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     750,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$     850,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     650,00
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no Bando PCD + Acompanhante     R$     650,00
+
+============================================================
+JOGO: Corinthians x Platense
+Data: 27/05/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Combo Família 1 (2+1)                    R$    1785,00
+    • Combo Família 4 ( 1+2)                   R$    1590,00
+    • Combo Família 2 (2+2)                    R$    2270,00
+    • Experiência Adulto                       R$     300,00
+    • Cadeira + Experiência                    R$     650,00
+    • Combo Família 3 (1+1)                    R$    1135,00
+    • Experiência Infantil                     R$     150,00
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [ATIVO]
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA EXTERNA R$     500,00
+    • FIELZONE | CHOPERIA                      R$     600,00
+    • CAMAROTE 5° ANDAR | CADEIRA PRETA        R$    1800,00
+    • CAMAROTE 5° ANDAR | LOUNGE               R$     800,00
+    • CAMAROTE 5° ANDAR | ARQUIBANCADA INTERNA R$    1000,00
+
+  Parceiro: Galeria SCCP (Ticket360)  [ATIVO]
+    • Padrao — Oeste Inferior Lateral (Bloco 402) R$     750,00
+    • Fiel — Oeste Inferior (Bloco 402) FT     R$     675,00
+
+  Parceiro: Lounge Brahma  [ATIVO]
     • Infantil até 11 anos                     R$     325,00
     • Inclusão no bando PCD + Acompanhante     R$     650,00
     • Experiência Lounge Corinthians           R$     650,00
 
 ============================================================
-Total de jogos: 6 | Total de ofertas: 32
+JOGO: Corinthians x Remo
+Data: 22/07/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     600,00
+    • Infantil até 11 anos                     R$     300,00
+    • Inclusão no Bando PCD + Acompanhante     R$     600,00
+
+============================================================
+JOGO: Corinthians x Athletico-PR
+Data: 29/07/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     600,00
+    • Infantil até 11 anos                     R$     300,00
+    • Inclusão no Bando PCD + Acompanhante     R$     600,00
+
+============================================================
+JOGO: Corinthians x Cruzeiro
+Data: 16/08/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     650,00
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no Bando PCD + Acompanhante     R$     650,00
+
+============================================================
+JOGO: Corinthians x Santos
+Data: 30/08/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     800,00
+    • Infantil até 11 anos                     R$     400,00
+    • Inclusão no Bando PCD + Acompanhante     R$     800,00
+
+============================================================
+JOGO: Corinthians x Chapecoense
+Data: 06/09/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     600,00
+    • Infantil até 11 anos                     R$     300,00
+    • Inclusão no Bando PCD + Acompanhante     R$     600,00
+
+============================================================
+JOGO: Corinthians x Fluminense
+Data: 20/09/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     650,00
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no Bando PCD + Acompanhante     R$     650,00
+
+============================================================
+JOGO: Corinthians x Vitória
+Data: 18/10/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     600,00
+    • Infantil até 11 anos                     R$     300,00
+    • Inclusão no Bando PCD + Acompanhante     R$     600,00
+
+============================================================
+JOGO: Corinthians x Mirassol
+Data: 28/10/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     600,00
+    • Infantil até 11 anos                     R$     300,00
+    • Inclusão no Bando PCD + Acompanhante     R$     600,00
+
+============================================================
+JOGO: Corinthians x Botafogo
+Data: 18/11/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     600,00
+    • Infantil até 11 anos                     R$     300,00
+    • Inclusão no Bando PCD + Acompanhante     R$     600,00
+
+============================================================
+JOGO: Corinthians x Grêmio
+Data: 29/11/2026 00:00
+============================================================
+
+  Parceiro: Arena Kids  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Bar do Zeca  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Camarote Fielzone  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Galeria SCCP (Ticket360)  [FECHADO]
+    (sem preços disponíveis)
+
+  Parceiro: Lounge Brahma  [ATIVO]
+    • Experiência Lounge Brahma                R$     650,00
+    • Infantil até 11 anos                     R$     325,00
+    • Inclusão no Bando PCD + Acompanhante     R$     650,00
+
+============================================================
+Total de jogos: 20 | Total de ofertas: 116
 ============================================================

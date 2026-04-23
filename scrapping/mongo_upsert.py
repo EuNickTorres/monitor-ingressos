@@ -86,14 +86,24 @@ def upsert_resultados(resultados: dict) -> None:
             data_jogo_str = dados_jogo.get("data_jogo", "")
             data_parsed = None
             if data_jogo_str:
+                ano = datetime.now(timezone.utc).replace(tzinfo=None).year
+                # Formato completo: dd/mm HHhMM
                 m = re.search(r'(\d{2})/(\d{2})\s+(\d{1,2})h(\d{2})', data_jogo_str)
                 if m:
                     dia, mes, hora, minuto = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4))
-                    ano = datetime.now(timezone.utc).replace(tzinfo=None).year
                     try:
                         data_parsed = datetime(ano, mes, dia, hora, minuto)
                     except ValueError:
                         pass
+                # Formato só data: dd/mm
+                if not data_parsed:
+                    m = re.search(r'(\d{2})/(\d{2})', data_jogo_str)
+                    if m:
+                        dia, mes = int(m.group(1)), int(m.group(2))
+                        try:
+                            data_parsed = datetime(ano, mes, dia, 0, 0)
+                        except ValueError:
+                            pass
 
             # Upsert Jogo — usa data real do jogo se disponível; senão usa now() só na criação
             set_on_insert = {"nome": nome_jogo, "slug": slug_jogo}
@@ -173,10 +183,18 @@ def upsert_resultados(resultados: dict) -> None:
                     )
 
                 if itens:
-                    # Achou preços novos — atualiza tudo
+                    # Merge com itens existentes: atualiza preços, adiciona novos, mantém os que sumiram
+                    existente = ofertas_col.find_one(
+                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id}, {"itens": 1}
+                    )
+                    itens_salvos = {i["nome"]: i for i in (existente.get("itens", []) if existente else [])}
+                    for item_novo in itens:
+                        itens_salvos[item_novo["nome"]] = item_novo
+                    itens_merged = list(itens_salvos.values())
+
                     ofertas_col.update_one(
                         {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
-                        {"$set": {"status": "ativo", "itens": itens}},
+                        {"$set": {"status": "ativo", "itens": itens_merged}},
                         upsert=True,
                     )
                 else:

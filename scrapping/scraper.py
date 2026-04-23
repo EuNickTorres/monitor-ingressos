@@ -87,19 +87,104 @@ def normalizar_jogo(texto):
     texto = unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('ascii')
     return re.sub(r'\s+', ' ', texto.strip().lower())
 
+_ALIASES_JOGO = {
+    'atletico-mg':          ['atletico mineiro', 'atletico mg'],
+    'atletico mineiro':     ['atletico-mg', 'atletico mg'],
+    'athletico-pr':         ['athletico paranaense'],
+    'athletico paranaense': ['athletico-pr'],
+    'vasco':                ['vasco da gama'],
+    'vasco da gama':        ['vasco'],
+    'sao paulo':            ['sao paulo fc'],
+}
+
 def jogo_corresponde(texto, busca):
     t = normalizar_jogo(texto)
     b = normalizar_jogo(busca)
     partes = b.split(' x ')
     if len(partes) == 2:
         time1, time2 = partes[0].strip(), partes[1].strip()
-        return (time1 in t and time2 in t) or b in t
+        time2_variantes = [time2] + _ALIASES_JOGO.get(time2, [])
+        return (time1 in t and any(v in t for v in time2_variantes)) or b in t
     return b in t
 
 def extrair_precos_texto(texto):
     padrao = r'R\$\s*[\d.,]+'
     encontrados = re.findall(padrao, texto, re.IGNORECASE)
     return list(dict.fromkeys(encontrados))
+
+def _extrair_nome_jogo(texto: str) -> str:
+    """Extrai 'Corinthians x Time' limpando datas e nomes de competição."""
+    # Remove tudo após separadores como – | /
+    texto = re.split(r'\s*[–\-|/]\s*(?=[A-ZÁÀÃÂÉÊÍÓÔÕÚÇ]{4})', texto)[0].strip()
+    # Se texto inteiro for maiúsculo, converte para título para facilitar parsing
+    if texto == texto.upper():
+        texto = texto.title()
+    m = re.search(r'Corinthians\s+x\s+(.+)', texto, re.IGNORECASE)
+    if not m:
+        return texto
+    palavras = m.group(1).split()
+    preposicoes = {'da', 'de', 'do', 'das', 'dos'}
+    time_parts = []
+    for p in palavras:
+        if p.isupper() and len(p) >= 3:
+            break
+        if len(time_parts) >= 3 and p.lower() not in preposicoes:
+            break
+        time_parts.append(p)
+    return f"Corinthians x {' '.join(time_parts)}" if time_parts else texto
+
+
+_ALIASES_TIMES = {
+    'atletico mineiro': 'Atlético-MG',
+    'atletico-mg': 'Atlético-MG',
+    'atletico mg': 'Atlético-MG',
+    'athletico paranaense': 'Athletico-PR',
+    'athletico-pr': 'Athletico-PR',
+    'vasco da gama': 'Vasco',
+    'sao paulo': 'São Paulo',
+}
+
+def _normalizar_nome_jogo(nome: str) -> str:
+    """Aplica aliases de nomes de times para consistência entre fontes."""
+    import unicodedata
+    chave = unicodedata.normalize('NFKD', nome).encode('ascii', 'ignore').decode('ascii').lower()
+    for alias, canonical in _ALIASES_TIMES.items():
+        if alias in chave:
+            time_canonical = canonical
+            return f"Corinthians x {time_canonical}"
+    return nome
+
+
+def _extrair_data_raw(texto: str) -> str:
+    """Extrai string de data de um bloco de texto. Retorna 'dd/mm HHhMM', 'dd/mm' ou ''."""
+    # Formato direto: dd/mm HHhMM
+    m = re.search(r'(\d{1,2}/\d{2})\s+(\d{1,2}h\d{2})', texto, re.IGNORECASE)
+    if m:
+        dia_mes = m.group(1)
+        partes = dia_mes.split('/')
+        return f"{partes[0].zfill(2)}/{partes[1]} {m.group(2)}"
+    # Formato Lounge Brahma: dd/mm/yyyy ... JOGO: HHhMM ou HH:MM
+    m_data = re.search(r'(\d{1,2}/\d{2})(?:/\d{2,4})?', texto)
+    m_hora = re.search(r'JOGO[:\s]+(\d{1,2})[Hh:](\d{2})', texto, re.IGNORECASE)
+    if m_data and m_hora:
+        partes = m_data.group(1).split('/')
+        hora = m_hora.group(1).zfill(2)
+        minuto = m_hora.group(2)
+        return f"{partes[0].zfill(2)}/{partes[1]} {hora}h{minuto}"
+    # Só data: dd/mm ou dd/mm/yyyy
+    if m_data:
+        partes = m_data.group(1).split('/')
+        return f"{partes[0].zfill(2)}/{partes[1]}"
+    meses = {
+        'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
+        'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
+        'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12',
+    }
+    for nome_mes, num_mes in meses.items():
+        m = re.search(rf'\b(\d{{1,2}})\s+de\s+{nome_mes}\b', texto, re.IGNORECASE)
+        if m:
+            return f"{m.group(1).zfill(2)}/{num_mes}"
+    return ""
 
 def formatar_hora():
     return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -652,9 +737,11 @@ async def scrape_ticket360(page, jogo):
                 try:
                     texto = (await link.inner_text()).strip()
                     href = await link.get_attribute("href") or ""
-                    eh_galeria = "galeria" in texto.lower() or "galeria" in href.lower()
-                    eh_jogo = jogo_corresponde(texto, jogo) or jogo_corresponde(href, jogo)
-                    if eh_galeria and eh_jogo:
+                    href_norm = href.replace('-', ' ')
+                    eh_galeria = "galeria" in href.lower()
+                    eh_jogo = jogo_corresponde(href_norm, jogo)
+                    eh_combo = "combo" in href.lower()
+                    if eh_galeria and eh_jogo and not eh_combo:
                         url_completa = href if href.startswith("http") else "https://www.ticket360.com.br/" + href.lstrip("/")
                         if url_completa not in [u for _, u in urls_galeria]:
                             urls_galeria.append((texto.strip().replace("\n", " "), url_completa))
@@ -673,14 +760,14 @@ async def scrape_ticket360(page, jogo):
     ingressos = []
     url_evento = urls_galeria[0][1]
 
-    # Deduplica URLs mantendo Fiel primeiro
+    # Deduplica URLs — processa Fiel e Padrao sem limite fixo
     urls_vistas = set()
     urls_unicas = []
     for nome_ev, url_ev in urls_galeria:
         if url_ev not in urls_vistas:
             urls_vistas.add(url_ev)
             urls_unicas.append((nome_ev, url_ev))
-    urls_galeria = urls_unicas[:2]  # max 2: Fiel + Padrao
+    urls_galeria = urls_unicas
 
     # Sempre usa prefixo quando tem mais de 1 evento
     sempre_prefixo = len(urls_galeria) > 1
@@ -806,9 +893,10 @@ async def scrape_ticket360_fiel(page, jogo):
                     href = await link.get_attribute("href") or ""
                     href_lower = href.lower()
                     texto_lower = texto.lower()
-                    eh_fiel = "fiel" in texto_lower or "fiel" in href_lower
-                    eh_galeria = "galeria" in texto_lower or "galeria" in href_lower or "sccp" in href_lower
-                    eh_jogo = jogo_corresponde(texto, jogo) or jogo_corresponde(href, jogo)
+                    href_norm = href.replace('-', ' ')
+                    eh_fiel = "fiel" in href_lower
+                    eh_galeria = "galeria" in href_lower or "sccp" in href_lower
+                    eh_jogo = jogo_corresponde(href_norm, jogo)
                     if eh_fiel and eh_jogo and not eh_galeria:
                         url_completa = href if href.startswith("http") else "https://www.ticket360.com.br/" + href.lstrip("/")
                         if url_completa not in [u for _, u in urls_evento]:
@@ -1117,6 +1205,131 @@ async def _buscar_jogos_arena_kids() -> list:
         return []
 
 
+async def _buscar_jogos_loungebrahma() -> list:
+    """Abre a home do Lounge Brahma e retorna lista de (nome, data_raw)."""
+    print("  [Auto] Buscando jogos na pagina do Lounge Brahma...")
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+            )
+            ctx = await browser.new_context(
+                locale="pt-BR", timezone_id="America/Sao_Paulo",
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            )
+            page = await ctx.new_page()
+            await page.goto("https://loungebrahma.com.br/", wait_until="domcontentloaded", timeout=60000)
+            await page.wait_for_timeout(2000)
+
+            pares = await page.evaluate(r"""() => {
+                const result = [];
+                const vistos = new Set();
+                for (const a of document.querySelectorAll('a')) {
+                    const texto = (a.innerText || '').replace(/\s+/g, ' ').trim();
+                    if (!texto.toLowerCase().includes('corinthians') || !texto.toLowerCase().includes(' x ')) continue;
+                    if (vistos.has(texto)) continue;
+                    vistos.add(texto);
+                    // Sobe no DOM procurando container que contenha padrão de data
+                    let dataTexto = '';
+                    let el = a.parentElement;
+                    for (let i = 0; i < 10 && el; i++, el = el.parentElement) {
+                        const t = (el.innerText || '').replace(/\s+/g, ' ').trim();
+                        if (t.length > 1200) break;
+                        if (/\d{1,2}\/\d{2}/.test(t) || /\d{1,2}H\d{2}/i.test(t)) {
+                            dataTexto = t;
+                            break;
+                        }
+                    }
+                    result.push({ nome: texto, container: dataTexto });
+                }
+                return result;
+            }""")
+
+            await browser.close()
+            jogos = [(_normalizar_nome_jogo(_extrair_nome_jogo(p["nome"])), _extrair_data_raw(p["container"])) for p in pares]
+            jogos = list({n: d for n, d in jogos}.items())  # deduplica por nome limpo
+            print(f"  [Auto] Lounge Brahma: {len(jogos)} jogo(s): {[(n, d) for n, d in jogos]}")
+            return jogos
+    except Exception as e:
+        print(f"  [Auto] Erro ao buscar jogos no Lounge Brahma: {e}")
+        return []
+
+
+async def _buscar_jogos_fielzone() -> list:
+    """Abre a home do Fielzone e retorna lista de (nome, data_raw)."""
+    print("  [Auto] Buscando jogos na pagina do Fielzone...")
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+            )
+            ctx = await browser.new_context(
+                locale="pt-BR", timezone_id="America/Sao_Paulo",
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            )
+            page = await ctx.new_page()
+            await page.goto("https://camarotefielzone.com.br/", wait_until="domcontentloaded", timeout=30000)
+            await page.wait_for_timeout(2000)
+
+            pares = await page.evaluate(r"""() => {
+                const result = [];
+                const vistos = new Set();
+                for (const a of document.querySelectorAll('a')) {
+                    const texto = (a.innerText || '').replace(/\s+/g, ' ').trim();
+                    if (!texto.toLowerCase().includes('corinthians') || !texto.toLowerCase().includes(' x ')) continue;
+                    if (vistos.has(texto)) continue;
+                    vistos.add(texto);
+                    let container = texto;
+                    let el = a.parentElement;
+                    for (let i = 0; i < 6 && el; i++, el = el.parentElement) {
+                        const t = (el.innerText || '').replace(/\s+/g, ' ').trim();
+                        if (t.length > texto.length && t.length < 600) { container = t; break; }
+                    }
+                    result.push({ nome: texto, container });
+                }
+                return result;
+            }""")
+
+            await browser.close()
+            jogos = [(_normalizar_nome_jogo(_extrair_nome_jogo(p["nome"])), _extrair_data_raw(p["container"])) for p in pares]
+            jogos = list({n: d for n, d in jogos}.items())  # deduplica por nome limpo
+            print(f"  [Auto] Fielzone: {len(jogos)} jogo(s): {[(n, d) for n, d in jogos]}")
+            return jogos
+    except Exception as e:
+        print(f"  [Auto] Erro ao buscar jogos no Fielzone: {e}")
+        return []
+
+
+async def _descobrir_jogos() -> tuple:
+    """Mescla jogos das 3 fontes. Retorna (lista_nomes, {nome: data_raw})."""
+    arena_kids = await _buscar_jogos_arena_kids()
+    lounge = await _buscar_jogos_loungebrahma()
+    fielzone = await _buscar_jogos_fielzone()
+
+    jogos_merged = []
+    data_hints = {}
+
+    # Arena Kids: só nomes (data vem do scraper de compra)
+    for nome in arena_kids:
+        if not any(jogo_corresponde(nome, j) or jogo_corresponde(j, nome) for j in jogos_merged):
+            jogos_merged.append(nome)
+
+    # Lounge Brahma e Fielzone: (nome, data_raw)
+    for lista in (lounge, fielzone):
+        for nome, data_raw in lista:
+            ja_existe = any(jogo_corresponde(nome, j) or jogo_corresponde(j, nome) for j in jogos_merged)
+            if not ja_existe:
+                jogos_merged.append(nome)
+            if data_raw:
+                # Guarda hint mesmo para jogos já conhecidos (Arena Kids pode não ter data ainda)
+                data_hints[nome] = data_raw
+
+    print(f"  [Auto] Total apos merge: {len(jogos_merged)} jogo(s): {jogos_merged}")
+    return jogos_merged, data_hints
+
+
 # ============================================================
 # MAIN
 # ============================================================
@@ -1131,10 +1344,11 @@ async def main():
 
     if args.jogo:
         jogos = [args.jogo]
+        data_hints = {}
     else:
-        jogos = await _buscar_jogos_arena_kids()
+        jogos, data_hints = await _descobrir_jogos()
         if not jogos:
-            print("Erro: nenhum jogo encontrado na pagina do Arena Kids")
+            print("Erro: nenhum jogo encontrado em nenhuma fonte")
             return
 
     print("=" * 60)
@@ -1233,6 +1447,13 @@ async def main():
                 if dados_p.get("data_jogo"):
                     data_jogo_extraida = dados_p["data_jogo"]
                     break
+
+            # Fallback: usa data extraída na descoberta (Lounge Brahma / Fielzone)
+            if not data_jogo_extraida:
+                for nome_hint, data_hint in data_hints.items():
+                    if jogo_corresponde(jogo, nome_hint) and data_hint:
+                        data_jogo_extraida = data_hint
+                        break
 
             resultados[jogo] = {
                 "parceiros": parceiros_novos,

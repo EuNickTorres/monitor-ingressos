@@ -158,8 +158,6 @@ Requer MongoDB rodando. Conecta via `MONGO_URI` (padrão: `mongodb://localhost:2
 
 ---
 
-## Onde parei — 2026-04-16
-
 ### Arena Kids — como renovar o login
 
 O scraper usa `ingresse_state.json` (cookies em JSON puro) em vez de perfil Chromium persistente.
@@ -171,3 +169,72 @@ Isso resolve o problema de incompatibilidade entre Windows (login local) e Linux
 3. Feche a janela do browser — o script salva `ingresse_state.json` automaticamente
 4. `docker compose restart scraper`
 5. Verificar nos logs: `[Arena Kids] Cart carregou!`
+
+---
+
+## Histórico de implementações relevantes
+
+### Descoberta automática de jogos (multi-fonte)
+O scraper não depende mais de uma lista manual de jogos. `_descobrir_jogos()` em `scraper.py` consulta 3 fontes em sequência e mescla com deduplicação:
+- **Arena Kids** — links `cart.ingresse.com` na página principal
+- **Lounge Brahma** — cards WooCommerce com nome e data no card (`DD/MM HHhMM`)
+- **Camarote Fielzone** — cards Ingresse com nome do jogo
+
+A deduplicação usa `_ALIASES_JOGO` + `_ALIASES_TIMES` para reconhecer nomes equivalentes (ex: "Vasco" = "Vasco da Gama", "Atletico MG" = "Atletico Mineiro").
+
+### Datas dos jogos
+- Lounge Brahma extrai data diretamente do card (`_extrair_data_raw()`)
+- Jogos descobertos por outras fontes usam o `data_hints` do Lounge Brahma como fallback
+- `mongo_upsert.py` parseia `dd/mm HHhMM` e `dd/mm` e salva no campo `data` do jogo
+
+### Filtro de jogos no Ticket360 (Galeria SCCP + Fiel Torcedor)
+Filtro baseado no **href do link** (não no texto do card), evitando falsos positivos por nomes de cidades. URLs com hífen são normalizadas (`href.replace('-', ' ')`). Combos são excluídos. Ambos os parceiros (ticket360 e ticket360_fiel) usam a mesma lógica.
+
+### Persistência de preços (merge em vez de sobrescrita)
+`mongo_upsert.py` faz merge dos itens existentes com os novos: preços são atualizados, itens novos são adicionados, itens que desapareceram da página (esgotados) são **mantidos** — não removidos. Somente se não houver nenhum item é que a oferta vira "fechado".
+
+### Frontend no Cloudflare Workers
+`frontend/index.html` (arquivo único) está publicado em:
+**https://monitor-ingressos.nicollastorresdamota.workers.dev/**
+Deploy via `wrangler deploy` na pasta `frontend/`. O arquivo `_redirects` foi removido pois causava loop infinito. `PROD_API_URL` em `index.html` ainda aponta para placeholder — atualizar após hospedar o backend.
+
+### Recuperar preços perdidos do Arena Kids
+Script `scrapping/recuperar_vasco_kids.py` — restaura preços do Arena Kids para Corinthians x Vasco a partir de backup. Serve de template caso outros preços sejam perdidos.
+
+---
+
+## Onde parei — 2026-04-22
+
+### O que foi feito hoje (2026-04-22)
+- Galeria SCCP: filtro de jogos corrigido para usar href em vez de texto do card (evita falsos positivos como "São Paulo" cidade)
+- Preços do Arena Kids para Corinthians x Vasco recuperados manualmente via `recuperar_vasco_kids.py`
+- Preços corretos da Galeria SCCP para Corinthians x São Paulo inseridos manualmente (R$ 585 Fiel / R$ 650 Padrão)
+- Preços errados do Fiel Torcedor para Corinthians x São Paulo removidos (oferta marcada como fechado)
+- Persistência de preços: merge em vez de sobrescrita já implementado em `mongo_upsert.py`
+
+### Pendente para amanhã
+
+#### 1. MongoDB → MongoDB Atlas (gratuito, 512MB)
+- Criar cluster free tier em https://cloud.mongodb.com
+- Pegar a connection string (`MONGO_URI`)
+
+#### 2. Backend → Render (gratuito)
+- Conectar o GitHub no Render e fazer deploy do serviço `backend/`
+- Configurar variável de ambiente `MONGO_URI` apontando pro Atlas
+- Após deploy, pegar a URL do Render e atualizar em `frontend/index.html`:
+  ```js
+  const PROD_API_URL = 'https://SUA-URL-DO-RENDER.onrender.com';
+  ```
+- Configurar CORS no backend para aceitar requisições do domínio `.workers.dev`
+
+#### 3. Scraper → GitHub Actions (gratuito)
+- Criar workflow `.github/workflows/scraper.yml` com cron `0 */6 * * *` (a cada 6h)
+- O runner do GitHub Actions tem 7GB RAM — suficiente para Playwright + Chromium
+- O `ingresse_state.json` (sessão Arena Kids) ficará como GitHub Secret e deverá ser atualizado manualmente quando a sessão expirar
+- Limite: 2000 min/mês grátis para repo privado (~1200 min usados com 4 execuções/dia de 10min)
+
+#### 4. Após tudo no ar
+- Atualizar `PROD_API_URL` em `frontend/index.html` com a URL real do Render
+- Fazer `wrangler deploy` para republicar o frontend com a URL correta
+- Testar o dashboard em produção
+
