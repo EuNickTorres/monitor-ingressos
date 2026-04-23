@@ -196,7 +196,7 @@ Filtro baseado no **href do link** (não no texto do card), evitando falsos posi
 ### Frontend no Cloudflare Workers
 `frontend/index.html` (arquivo único) está publicado em:
 **https://monitor-ingressos.nicollastorresdamota.workers.dev/**
-Deploy via `wrangler deploy` na pasta `frontend/`. O arquivo `_redirects` foi removido pois causava loop infinito. `PROD_API_URL` em `index.html` ainda aponta para placeholder — atualizar após hospedar o backend.
+Deploy via `wrangler deploy` na pasta `frontend/`. O arquivo `_redirects` foi removido pois causava loop infinito. `PROD_API_URL` aponta para `https://monitor-ingressos.onrender.com` (atualizado em 2026-04-23).
 
 ### Recuperar preços perdidos do Arena Kids
 Script `scrapping/recuperar_vasco_kids.py` — restaura preços do Arena Kids para Corinthians x Vasco a partir de backup. Serve de template caso outros preços sejam perdidos.
@@ -212,29 +212,50 @@ Script `scrapping/recuperar_vasco_kids.py` — restaura preços do Arena Kids pa
 - Preços errados do Fiel Torcedor para Corinthians x São Paulo removidos (oferta marcada como fechado)
 - Persistência de preços: merge em vez de sobrescrita já implementado em `mongo_upsert.py`
 
-### Pendente para amanhã
+---
 
-#### 1. MongoDB → MongoDB Atlas (gratuito, 512MB)
-- Criar cluster free tier em https://cloud.mongodb.com
-- Pegar a connection string (`MONGO_URI`)
+## Onde parei — 2026-04-23
 
-#### 2. Backend → Render (gratuito)
-- Conectar o GitHub no Render e fazer deploy do serviço `backend/`
-- Configurar variável de ambiente `MONGO_URI` apontando pro Atlas
-- Após deploy, pegar a URL do Render e atualizar em `frontend/index.html`:
-  ```js
-  const PROD_API_URL = 'https://SUA-URL-DO-RENDER.onrender.com';
-  ```
-- Configurar CORS no backend para aceitar requisições do domínio `.workers.dev`
+### O que foi feito hoje (2026-04-23)
 
-#### 3. Scraper → GitHub Actions (gratuito)
+#### Infraestrutura de produção — concluída ✓
+
+**MongoDB Atlas (banco em produção)**
+- Cluster free tier criado em https://cloud.mongodb.com (Cluster0, região US)
+- Usuário: `admin` / senha: `Admin1234`
+- Network Access: `0.0.0.0/0` liberado (acesso de qualquer IP — necessário para Render e GitHub Actions)
+- Connection string: `mongodb+srv://admin:Admin1234@cluster0.tx54haz.mongodb.net/ingressos`
+- Dados migrados do MongoDB local (Docker) via `mongodump` + `mongorestore`: 20 jogos, 6 parceiros, 116 ofertas
+
+**Backend no Render**
+- Serviço: `monitor-ingressos` em https://render.com
+- URL de produção: **https://monitor-ingressos.onrender.com**
+- Plano: Free (512MB RAM) — suficiente para o Express/Mongoose
+- Runtime: Docker usando `backend/Dockerfile`
+- Variáveis de ambiente configuradas: `MONGO_URI`, `NODE_ENV=production`
+- ⚠️ O plano free hiberna após inatividade — primeira requisição pode demorar ~50s para acordar
+
+**Frontend atualizado**
+- `PROD_API_URL` em `frontend/index.html` atualizado para `https://monitor-ingressos.onrender.com`
+- Dashboard em produção funcionando: https://monitor-ingressos.nicollastorresdamota.workers.dev/
+
+#### Como fazer backup e restaurar o banco
+```bash
+# Exportar do MongoDB local (Docker)
+docker exec -it ingressos-mongo mongodump --db ingressos --out /tmp/dump
+docker cp ingressos-mongo:/tmp/dump ./dump
+
+# Importar no Atlas
+docker cp ./dump/ingressos ingressos-mongo:/tmp/dump-restore
+docker exec -it ingressos-mongo mongorestore --uri "mongodb+srv://admin:Admin1234@cluster0.tx54haz.mongodb.net/ingressos" /tmp/dump-restore
+```
+
+### Pendente
+
+#### Scraper → GitHub Actions (gratuito)
 - Criar workflow `.github/workflows/scraper.yml` com cron `0 */6 * * *` (a cada 6h)
 - O runner do GitHub Actions tem 7GB RAM — suficiente para Playwright + Chromium
 - O `ingresse_state.json` (sessão Arena Kids) ficará como GitHub Secret e deverá ser atualizado manualmente quando a sessão expirar
+- A `MONGO_URI` do Atlas também ficará como GitHub Secret
 - Limite: 2000 min/mês grátis para repo privado (~1200 min usados com 4 execuções/dia de 10min)
-
-#### 4. Após tudo no ar
-- Atualizar `PROD_API_URL` em `frontend/index.html` com a URL real do Render
-- Fazer `wrangler deploy` para republicar o frontend com a URL correta
-- Testar o dashboard em produção
 

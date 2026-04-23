@@ -1313,6 +1313,7 @@ async def _descobrir_jogos() -> tuple:
 
     # Arena Kids: só nomes (data vem do scraper de compra)
     for nome in arena_kids:
+        nome = _normalizar_nome_jogo(nome)
         if not any(jogo_corresponde(nome, j) or jogo_corresponde(j, nome) for j in jogos_merged):
             jogos_merged.append(nome)
 
