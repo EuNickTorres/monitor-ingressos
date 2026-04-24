@@ -1340,7 +1340,8 @@ async def main():
 
     if args.jogo:
         jogos = [args.jogo]
-        data_hints = {}
+        # Busca data_hints do Lounge Brahma mesmo com --jogo, para atualizar horário no banco
+        _, data_hints = await _descobrir_jogos()
     else:
         jogos, data_hints = await _descobrir_jogos()
         if not jogos:

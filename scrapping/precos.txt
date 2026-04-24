@@ -1,6 +1,6 @@
 ============================================================
   MONITOR DE INGRESSOS — PREÇOS
-  Gerado em: 22/04/2026 00:38
+  Gerado em: 23/04/2026 23:16
 ============================================================
 
 ============================================================
@@ -49,8 +49,14 @@ Data: 12/04/2026 18:30
 ============================================================
 
   Parceiro: Arena Kids  [ATIVO]
-    • FANZONE - PISTA PREMIUM                  R$     900,00
-    • FANZONE - CADEIRA INFERIOR               R$     800,00
+    • Cadeira Preta - Combo 1 (2 adultos + 2 crianças) R$    2700,00
+    • Cadeira Preta - Combo 2 (2 adultos + 1 criança) R$    2350,00
+    • Cadeira Preta - Combo 3 (1 adulto + 1 criança) R$    1350,00
+    • Cadeira Preta - Combo 4 (1 adulto + 2 crianças) R$    1700,00
+    • Terraço em Pé - Combo 1 (2 adultos + 2 crianças) R$    1900,00
+    • Terraço em Pé - Combo 2 (2 adultos + 1 criança) R$    1550,00
+    • Terraço em Pé - Combo 3 (1 adulto + 1 criança) R$     950,00
+    • Terraço em Pé - Combo 4 (1 adulto + 2 crianças) R$    1300,00
 
   Parceiro: Bar do Zeca  [ATIVO]
     • Cadeira + Experiência                    R$    1200,00
@@ -140,6 +146,12 @@ Data: 26/04/2026 16:00
 
   Parceiro: Arena Kids  [ATIVO]
     • Combo 4 Família Terraço em Pé            R$     960,00
+    • Combo 4 Família Cadeira Preta            R$    1160,00
+    • Combo 1 Família Terraço em Pé            R$    1360,00
+    • Combo 2 Família Terraço em Pé            R$    1080,00
+    • Combo 3 Família Terraço em Pé            R$     680,00
+    • Terraço em Pé adulto avulso              R$     400,00
+    • Terraço em Pé criança avulsa até 11 anos R$     300,00
 
   Parceiro: Bar do Zeca  [ATIVO]
     • Combo Família 2 (2+2)                    R$    2100,00
@@ -194,7 +206,6 @@ Data: 30/04/2026 21:00
   Parceiro: Bar do Zeca  [ATIVO]
     • Combo Família 1 (2+1)                    R$    1785,00
     • Combo Família 4 ( 1+2)                   R$    1590,00
-    • Combo Família 1 (2+1)                    R$    2270,00
     • Experiência Adulto                       R$     300,00
     • Cadeira + Experiência                    R$     650,00
     • Combo Família 3 (1+1)                    R$    1135,00
@@ -296,8 +307,14 @@ Data: 24/05/2026 00:00
   Parceiro: Arena Kids  [FECHADO]
     (sem preços disponíveis)
 
-  Parceiro: Bar do Zeca  [FECHADO]
-    (sem preços disponíveis)
+  Parceiro: Bar do Zeca  [ATIVO]
+    • Combo Família 2 (2+2)                    R$    2100,00
+    • Experiência Adulto                       R$     300,00
+    • Cadeira + Experiência                    R$     600,00
+    • Combo Família 3 (1+1)                    R$    1050,00
+    • Experiência Infantil                     R$     150,00
+    • Combo Família 1 (2+1)                    R$    1650,00
+    • Combo Família 4 ( 1+2)                   R$    1470,00
 
   Parceiro: Camarote Fiel Torcedor (Ticket360)  [FECHADO]
     (sem preços disponíveis)
