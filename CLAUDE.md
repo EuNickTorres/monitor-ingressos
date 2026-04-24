@@ -172,6 +172,26 @@ Isso resolve o problema de incompatibilidade entre Windows (login local) e Linux
 
 ---
 
+## Caso o Arena Kids expire (produção via GitHub Actions)
+
+Quando a sessão do Ingresse expirar, o scraper **não quebra** — os outros 5 parceiros continuam funcionando normalmente. O Arena Kids simplesmente retorna sem dados para aquela execução.
+
+**Como saber que expirou:**
+- Acesse o GitHub → repositório → aba **Actions** → última execução do "Scraper de Ingressos"
+- Abra o passo **"Rodar scraper"** e procure nos logs por `"Sessao expirada"` ou `[Arena Kids]` sem dados
+- Outra forma: no dashboard, o card do Arena Kids vai parar de atualizar os preços
+
+**Como renovar:**
+1. Rode localmente: `python scrapping/login_arenakids.py`
+2. Browser abre no `cart.ingresse.com` — faça o login normalmente
+3. Feche a janela — o script salva `ingresse_state.json` automaticamente
+4. ⚠️ **NÃO commite** esse arquivo — ele contém dados pessoais (CPF, email, etc.)
+5. Copie o conteúdo do `ingresse_state.json` gerado
+6. Vá no GitHub → Settings → Secrets and variables → Actions → edite o secret `INGRESSE_STATE` colando o novo conteúdo
+7. Na próxima execução do GitHub Actions (automática ou manual), a sessão já estará renovada
+
+---
+
 ## Histórico de implementações relevantes
 
 ### Descoberta automática de jogos (multi-fonte)
