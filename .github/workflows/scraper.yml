@@ -2,7 +2,7 @@ name: Scraper de Ingressos
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # a cada 6 horas
+    - cron: '0 */9 * * *'   # a cada 9 horas (00:00, 09:00, 18:00)
   workflow_dispatch:          # permite rodar manualmente pelo GitHub
 
 jobs:
