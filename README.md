@@ -257,7 +257,7 @@ SCRAPER_INTERVAL_HOURS=6
 
 ---
 
-## 8. Resumo para Recuperação de Contexto (IA)
+## 8. Resumo para Recuperação de Contexto (LLM)
 
 
 
