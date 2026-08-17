@@ -259,7 +259,7 @@ SCRAPER_INTERVAL_HOURS=6
 
 ## 8. Resumo para Recuperação de Contexto (IA)
 
-> **Se você esquecer tudo, aqui está o que mais importa:**
+
 
 - **O que é:** Dashboard de monitoramento de preços de ingressos do Corinthians, com scraping automático de 6 sites parceiros.
 - **Como funciona:** Scraper Python/Playwright roda a cada 6h → grava no MongoDB → API Node.js/Express expõe os dados → frontend HTML puro consome a API.
