@@ -18,6 +18,10 @@ const ofertaSchema = new mongoose.Schema({
   jogo_id: { type: mongoose.Schema.Types.ObjectId, ref: "Jogo", required: true },
   status: { type: String, enum: ["ativo", "fechado"], default: "ativo" },
   itens: [itemSchema],
+  atualizado_em: Date,
+  ultima_tentativa_em: Date,
+  ultimo_erro: String,
+  desatualizado: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Oferta", ofertaSchema);

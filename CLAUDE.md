@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 docker compose up -d
 ```
-Starts MongoDB (port 27017), backend API (port 3000), and the Python scraper. Then open `frontend/dashboard.html` in a browser.
+Starts MongoDB (port 27017), backend API (port 3000), and the Python scraper. Then open `frontend/index.html` in a browser.
 
 ### Backend Only
 ```bash
@@ -39,13 +39,13 @@ python run_scheduled.py                                    # loop (interval via 
 Three services communicate as follows:
 
 ```
-frontend/dashboard.html  →  backend (Express/Node)  →  MongoDB
+frontend/index.html + app.js  →  backend (Express/Node)  →  MongoDB
                                                          ↑
                          scrapping/ (Python/Playwright) ─┘
 ```
 
 - **`backend/`** — Express 5 + Mongoose 8 API. Routes: `/jogos`, `/parceiros`, `/ofertas`. Supports filtering offers by `?jogo_slug=`, `?parceiro_slug=`, `?status=`.
-- **`frontend/dashboard.html`** — Single self-contained HTML file. Auto-detects localhost vs production for API URL. Polls backend every 60s.
+- **`frontend/index.html` + `styles.css` + `app.js`** — Static SPA. Auto-detects localhost vs production, groups duplicate games, separates upcoming/history, and refreshes the API every 60s.
 - **`scrapping/`** — Playwright (Chromium headless) scraper with 6 vendor strategies in `scraper.py`. `mongo_upsert.py` normalizes and upserts data. `run_scheduled.py` is the loop driver.
 
 ## MongoDB Schema
@@ -242,9 +242,9 @@ Script `scrapping/recuperar_vasco_kids.py` — restaura preços do Arena Kids pa
 
 **MongoDB Atlas (banco em produção)**
 - Cluster free tier criado em https://cloud.mongodb.com (Cluster0, região US)
-- Usuário: `admin` / senha: `Admin1234`
+- Usuário: configurado no MongoDB Atlas; senha armazenada apenas nos secrets de deploy
 - Network Access: `0.0.0.0/0` liberado (acesso de qualquer IP — necessário para Render e GitHub Actions)
-- Connection string: `mongodb+srv://admin:Admin1234@cluster0.tx54haz.mongodb.net/ingressos`
+- Connection string: configurada via secret `MONGO_URI` (não registrar credenciais no repositório)
 - Dados migrados do MongoDB local (Docker) via `mongodump` + `mongorestore`: 20 jogos, 6 parceiros, 116 ofertas
 
 **Backend no Render**
@@ -267,7 +267,7 @@ docker cp ingressos-mongo:/tmp/dump ./dump
 
 # Importar no Atlas
 docker cp ./dump/ingressos ingressos-mongo:/tmp/dump-restore
-docker exec -it ingressos-mongo mongorestore --uri "mongodb+srv://admin:Admin1234@cluster0.tx54haz.mongodb.net/ingressos" /tmp/dump-restore
+docker exec -it ingressos-mongo mongorestore --uri "$MONGO_URI" /tmp/dump-restore
 ```
 
 ### Pendente

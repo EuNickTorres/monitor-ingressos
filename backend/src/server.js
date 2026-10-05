@@ -9,9 +9,15 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
+app.disable("x-powered-by");
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "32kb" }));
 app.use("/", routes);
+
+app.use((err, req, res, next) => {
+  console.error(`[${req.method} ${req.originalUrl}]`, err.message);
+  res.status(500).json({ erro: "Erro interno do servidor" });
+});
 
 connectDB()
   .then(() => {

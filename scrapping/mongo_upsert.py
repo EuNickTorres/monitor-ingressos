@@ -6,6 +6,7 @@ Faz upsert de Jogos, Parceiros e Ofertas.
 """
 import os
 import re
+import unicodedata
 from datetime import datetime, timezone
 
 from pymongo import MongoClient, ReturnDocument
@@ -16,6 +17,7 @@ _NOME_FALLBACK = re.compile(r"^ingresso\s+\d+$|^ver no site$", re.IGNORECASE)
 
 
 def _make_slug(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
     text = text.lower().strip()
     text = re.sub(r"[^\w\s-]", "", text)
     text = re.sub(r"[\s_]+", "-", text)
@@ -86,13 +88,18 @@ def upsert_resultados(resultados: dict) -> None:
             data_jogo_str = dados_jogo.get("data_jogo", "")
             data_parsed = None
             if data_jogo_str:
-                ano = datetime.now(timezone.utc).replace(tzinfo=None).year
+                agora = datetime.now(timezone.utc).replace(tzinfo=None)
+                ano = agora.year
                 # Formato completo: dd/mm HHhMM
                 m = re.search(r'(\d{2})/(\d{2})\s+(\d{1,2})h(\d{2})', data_jogo_str)
                 if m:
                     dia, mes, hora, minuto = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4))
                     try:
                         data_parsed = datetime(ano, mes, dia, hora, minuto)
+                        # Em novembro/dezembro, eventos de janeiro pertencem ao
+                        # ano seguinte. Evita salvar jogos futuros no passado.
+                        if data_parsed < agora and (agora - data_parsed).days > 120:
+                            data_parsed = data_parsed.replace(year=ano + 1)
                     except ValueError:
                         pass
                 # Formato só data: dd/mm
@@ -102,6 +109,8 @@ def upsert_resultados(resultados: dict) -> None:
                         dia, mes = int(m.group(1)), int(m.group(2))
                         try:
                             data_parsed = datetime(ano, mes, dia, 0, 0)
+                            if data_parsed < agora and (agora - data_parsed).days > 120:
+                                data_parsed = data_parsed.replace(year=ano + 1)
                         except ValueError:
                             pass
 
@@ -128,37 +137,50 @@ def upsert_resultados(resultados: dict) -> None:
                 # Upsert Parceiro sempre (mesmo em caso de erro)
                 parceiro_doc = parceiros_col.find_one_and_update(
                     {"slug": slug_parceiro},
-                    {"$setOnInsert": {"nome": nome_parceiro, "slug": slug_parceiro}},
+                    {
+                        "$setOnInsert": {"nome": nome_parceiro, "slug": slug_parceiro},
+                        "$set": {"url": dados_parceiro.get("url_base", "")},
+                    },
                     upsert=True,
                     return_document=ReturnDocument.AFTER,
                 )
                 parceiro_id = parceiro_doc["_id"]
 
                 if "erro" in dados_parceiro:
-                    # Se já tem itens salvos, preserva como ativo; senão cria/mantém como fechado
+                    # Preserva o ultimo resultado valido, mas marca claramente
+                    # que a fonte falhou nesta tentativa.
                     _existente = ofertas_col.find_one(
                         {"parceiro_id": parceiro_id, "jogo_id": jogo_id}, {"itens": 1}
                     )
+                    campos_erro = {
+                        "ultima_tentativa_em": datetime.now(timezone.utc),
+                        "ultimo_erro": _limpar_texto(str(dados_parceiro.get("erro", "Falha na coleta")))[:500],
+                        "desatualizado": True,
+                    }
                     if not (_existente and _existente.get("itens")):
-                        ofertas_col.update_one(
-                            {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
-                            {"$set": {"status": "fechado", "itens": []}},
-                            upsert=True,
-                        )
+                        campos_erro.update({"status": "fechado", "itens": []})
+                    ofertas_col.update_one(
+                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
+                        {"$set": campos_erro},
+                        upsert=True,
+                    )
                     total_ofertas += 1
                     continue
 
                 # Upsert Parceiro
                 parceiro_doc = parceiros_col.find_one_and_update(
                     {"slug": slug_parceiro},
-                    {"$setOnInsert": {"nome": nome_parceiro, "slug": slug_parceiro}},
+                    {
+                        "$setOnInsert": {"nome": nome_parceiro, "slug": slug_parceiro},
+                        "$set": {"url": dados_parceiro.get("url_base", "")},
+                    },
                     upsert=True,
                     return_document=ReturnDocument.AFTER,
                 )
                 parceiro_id = parceiro_doc["_id"]
 
                 # Mapeia ingressos → itens (schema do modelo Oferta)
-                itens = []
+                itens_por_nome = {}
                 for ing in dados_parceiro.get("ingressos", []):
                     # Limpa e valida o nome
                     nome_raw = ing.get("setor", "")
@@ -173,41 +195,50 @@ def upsert_resultados(resultados: dict) -> None:
                     if preco <= 0:
                         continue
 
-                    itens.append(
-                        {
-                            "nome": nome,
-                            "preco": preco,
-                            "tipo": "individual",
-                            "publico": "adulto",
-                        }
-                    )
+                    chave_item = unicodedata.normalize("NFKD", nome).encode("ascii", "ignore").decode("ascii").lower()
+                    itens_por_nome[chave_item] = {
+                        "nome": nome,
+                        "preco": preco,
+                        "tipo": "individual",
+                        "publico": "adulto",
+                    }
+
+                itens = list(itens_por_nome.values())
 
                 if itens:
-                    # Merge com itens existentes: atualiza preços, adiciona novos, mantém os que sumiram
-                    existente = ofertas_col.find_one(
-                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id}, {"itens": 1}
-                    )
-                    itens_salvos = {i["nome"]: i for i in (existente.get("itens", []) if existente else [])}
-                    for item_novo in itens:
-                        itens_salvos[item_novo["nome"]] = item_novo
-                    itens_merged = list(itens_salvos.values())
-
+                    agora_coleta = datetime.now(timezone.utc)
                     ofertas_col.update_one(
                         {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
-                        {"$set": {"status": "ativo", "itens": itens_merged}},
+                        {
+                            "$set": {
+                                "status": "ativo",
+                                "itens": itens,
+                                "atualizado_em": agora_coleta,
+                                "ultima_tentativa_em": agora_coleta,
+                                "desatualizado": False,
+                            },
+                            "$unset": {"ultimo_erro": ""},
+                        },
                         upsert=True,
                     )
                 else:
-                    # Sem preços — se tem itens salvos, preserva "ativo"; senão cria/mantém como "fechado"
+                    # Resultado vazio pode ser bloqueio temporario do site.
+                    # Mantem dados anteriores, mas nunca os apresenta como atuais.
                     _existente = ofertas_col.find_one(
                         {"parceiro_id": parceiro_id, "jogo_id": jogo_id}, {"itens": 1}
                     )
+                    campos_vazios = {
+                        "ultima_tentativa_em": datetime.now(timezone.utc),
+                        "ultimo_erro": "Nenhum preco valido encontrado na ultima coleta",
+                        "desatualizado": True,
+                    }
                     if not (_existente and _existente.get("itens")):
-                        ofertas_col.update_one(
-                            {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
-                            {"$set": {"status": "fechado", "itens": []}},
-                            upsert=True,
-                        )
+                        campos_vazios.update({"status": "fechado", "itens": []})
+                    ofertas_col.update_one(
+                        {"parceiro_id": parceiro_id, "jogo_id": jogo_id},
+                        {"$set": campos_vazios},
+                        upsert=True,
+                    )
                 total_ofertas += 1
 
         print(

@@ -123,7 +123,18 @@ def _extrair_nome_jogo(texto: str) -> str:
     m = re.search(r'Corinthians\s+x\s+(.+)', texto, re.IGNORECASE)
     if not m:
         return texto
-    palavras = m.group(1).split()
+    adversario = m.group(1)
+    # Algumas vitrines concatenam o campeonato ao nome do evento. Isso gerava
+    # jogos diferentes para a mesma partida (por exemplo, "x Santos" e
+    # "x Santos Campeonato Brasileiro").
+    adversario = re.split(
+        r'\s+(?:campeonato|brasileir[a-z]*|conmebol|conmenbol|libertadores|'
+        r'copa|sul-americana|paulista|rodada|ingressos?|bilhetes?)\b',
+        adversario,
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0].strip()
+    palavras = adversario.split()
     preposicoes = {'da', 'de', 'do', 'das', 'dos'}
     time_parts = []
     for p in palavras:
@@ -143,6 +154,10 @@ _ALIASES_TIMES = {
     'athletico-pr': 'Athletico-PR',
     'vasco da gama': 'Vasco',
     'sao paulo': 'São Paulo',
+    'club estudiantes de la plata': 'Estudiantes',
+    'club estudiantes de': 'Estudiantes',
+    'estudiantes': 'Estudiantes',
+    'rosario central': 'Rosario Central',
 }
 
 def _normalizar_nome_jogo(nome: str) -> str:
@@ -1326,6 +1341,45 @@ async def _descobrir_jogos() -> tuple:
     return jogos_merged, data_hints
 
 
+async def _raspar_parceiro_com_retry(context, parceiro: dict, jogo: str) -> dict:
+    """Executa uma fonte com uma nova pagina a cada tentativa.
+
+    Erros de negocio retornados pelo scraper (por exemplo, evento ainda nao
+    publicado) nao sao repetidos. Excecoes de rede/browser recebem uma nova
+    tentativa para evitar perder uma fonte inteira por uma falha transitoria.
+    """
+    max_tentativas = max(1, int(os.getenv("SCRAPER_MAX_ATTEMPTS", "2")))
+    ultimo_erro = None
+
+    for tentativa in range(1, max_tentativas + 1):
+        page = await context.new_page()
+        try:
+            tipo = parceiro["tipo"]
+            if tipo == "fielzone":
+                return await scrape_fielzone(page, jogo)
+            if tipo == "loungebrahma":
+                return await scrape_loungebrahma(page, jogo)
+            if tipo == "soudaliga":
+                return await scrape_soudaliga(page, jogo)
+            if tipo == "arenakids":
+                return await scrape_arenakids(page, jogo)
+            if tipo == "ticket360":
+                return await scrape_ticket360(page, jogo)
+            if tipo == "ticket360_fiel":
+                return await scrape_ticket360_fiel(page, jogo)
+            return {"erro": f"Tipo desconhecido: {tipo}"}
+        except Exception as exc:
+            ultimo_erro = exc
+            if tentativa < max_tentativas:
+                espera = min(2 ** tentativa, 5)
+                print(f"  ! Tentativa {tentativa} falhou ({exc}); novo teste em {espera}s")
+                await asyncio.sleep(espera)
+        finally:
+            await page.close()
+
+    raise ultimo_erro or RuntimeError("Falha desconhecida no scraper")
+
+
 # ============================================================
 # MAIN
 # ============================================================
@@ -1397,23 +1451,8 @@ async def main():
                 if args.parceiro and parceiro["tipo"] != args.parceiro:
                     continue
                 print(f"\n-> Raspando: {parceiro['nome']}")
-                page = await context.new_page()
                 try:
-                    tipo = parceiro["tipo"]
-                    if tipo == "fielzone":
-                        dados = await scrape_fielzone(page, jogo)
-                    elif tipo == "loungebrahma":
-                        dados = await scrape_loungebrahma(page, jogo)
-                    elif tipo == "soudaliga":
-                        dados = await scrape_soudaliga(page, jogo)
-                    elif tipo == "arenakids":
-                        dados = await scrape_arenakids(page, jogo)
-                    elif tipo == "ticket360":
-                        dados = await scrape_ticket360(page, jogo)
-                    elif tipo == "ticket360_fiel":
-                        dados = await scrape_ticket360_fiel(page, jogo)
-                    else:
-                        dados = {"erro": "Tipo desconhecido"}
+                    dados = await _raspar_parceiro_com_retry(context, parceiro, jogo)
 
                     dados["nome"] = parceiro["nome"]
                     dados["cor"] = parceiro["cor"]
@@ -1435,8 +1474,6 @@ async def main():
                         "url_base": parceiro["url"], "erro": str(e),
                         "ingressos": [], "atualizado_em": formatar_hora()
                     }
-                finally:
-                    await page.close()
 
             # Propaga data_jogo extraída do Arena Kids (se disponível)
             data_jogo_extraida = ""
@@ -1463,7 +1500,10 @@ async def main():
     try:
         mongo_upsert.upsert_resultados(resultados)
     except Exception as e:
+        # Propaga a falha para o GitHub Actions/cron marcar a execucao como
+        # quebrada. Antes o workflow terminava com sucesso mesmo sem persistir.
         print(f"[MongoDB] Erro no upsert: {e}")
+        raise
 
     print(f"\nScraping concluído — {formatar_hora()}")
     print("=" * 60)

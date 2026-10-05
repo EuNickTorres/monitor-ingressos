@@ -12,7 +12,7 @@
 
 ```
 ┌──────────────────┐        HTTP REST         ┌──────────────────────┐
-│  dashboard.html  │ ◄─────────────────────── │  backend (Node.js)   │
+│  frontend SPA    │ ◄─────────────────────── │  backend (Node.js)   │
 │  (Vanilla JS)    │   /jogos, /ofertas        │  Express + Mongoose  │
 └──────────────────┘                           └──────────┬───────────┘
                                                           │ ODM
@@ -63,7 +63,9 @@ monitor-ingressos/
 │       │   └── Oferta.js       # Schema: parceiro_id, jogo_id, status, itens[]
 │       └── seed.js             # Popula DB com dados de exemplo
 ├── frontend/
-│   └── dashboard.html          # SPA completa (CSS e JS embutidos)
+│   ├── index.html              # Estrutura semântica da SPA
+│   ├── styles.css              # Design responsivo
+│   └── app.js                  # API, filtros e renderização
 └── scrapping/
     ├── Dockerfile              # python:3.11-slim + Playwright Chromium
     ├── requirements.txt        # playwright, pymongo
@@ -172,7 +174,7 @@ Isso sobe:
 
 ### Acessar o dashboard
 
-Abra `frontend/dashboard.html` diretamente no navegador.
+Abra `frontend/index.html` diretamente no navegador.
 > O JS detecta `localhost` e aponta para `http://localhost:3000`
 
 ### Rodar seed (dados de exemplo)
@@ -204,6 +206,7 @@ MONGO_URI=mongodb://mongo:27017/ingressos
 ```env
 MONGO_URI=mongodb://mongo:27017/ingressos
 SCRAPER_INTERVAL_HOURS=6
+SCRAPER_MAX_ATTEMPTS=2
 ```
 
 ---
@@ -244,7 +247,7 @@ SCRAPER_INTERVAL_HOURS=6
 
 4. **Sem autenticação na API:** Qualquer cliente pode ler todos os dados. Adequado para uso interno/local.
 
-5. **`dashboard.css` está desatualizado:** O CSS real está embutido em `dashboard.html`. O arquivo `.css` separado é backup/rascunho.
+5. **Frontend sem build:** A interface usa `index.html`, `styles.css` e `app.js` diretamente, sem bundler ou framework.
 
 6. **`prices.json`:** Cache local criado pelo scraper. Não é usado pelo backend — é apenas um artefato de debug/backup.
 
@@ -268,7 +271,7 @@ SCRAPER_INTERVAL_HOURS=6
   - `scrapping/mongo_upsert.py` — normalização de dados e persistência
   - `backend/src/routes/ofertas.js` — endpoint principal com filtros
   - `backend/src/models/Oferta.js` — modelo de dados central
-  - `frontend/dashboard.html` — toda a UI (CSS e JS embutidos)
+  - `frontend/index.html`, `frontend/styles.css`, `frontend/app.js` — interface web completa
 - **Para subir:** `docker compose up -d` na raiz
 - **Ponto de atenção:** A sessão do Ingresse (Arena Kids) pode expirar e exigir login manual. O perfil do browser fica em `scrapping/ingresse_profile/`.
 - **Não há framework no frontend** — JS vanilla puro com polling a cada 60s.

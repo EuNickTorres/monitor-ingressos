@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
 
   const ofertas = await Oferta.find(filter)
     .populate("jogo_id", "nome data slug")
-    .populate("parceiro_id", "nome slug");
+    .populate("parceiro_id", "nome slug url");
 
   res.json(ofertas);
 });
@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const oferta = await Oferta.findById(req.params.id)
     .populate("jogo_id", "nome data slug")
-    .populate("parceiro_id", "nome slug");
+    .populate("parceiro_id", "nome slug url");
 
   if (!oferta) return res.status(404).json({ erro: "Oferta não encontrada" });
   res.json(oferta);
