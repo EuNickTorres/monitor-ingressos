@@ -71,9 +71,15 @@ def upsert_resultados(resultados: dict) -> None:
     Se todos os itens forem descartados, a oferta fica como "fechado".
     """
     uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/ingressos")
+    db_padrao = os.getenv("MONGO_DB_NAME", "ingressos")
     client = MongoClient(uri, serverSelectionTimeoutMS=5000)
     try:
-        db = client.get_default_database()
+        # O Atlas permite connection strings sem o caminho do banco
+        # (…mongodb.net/?retryWrites=…). Nessa situação o PyMongo não tem um
+        # database padrão e get_default_database() lança ConfigurationError.
+        # Mantém o banco declarado na URI quando houver e usa "ingressos"
+        # como fallback seguro quando o caminho estiver ausente.
+        db = client.get_default_database(default=db_padrao)
         jogos_col = db["jogos"]
         parceiros_col = db["parceiros"]
         ofertas_col = db["ofertas"]
